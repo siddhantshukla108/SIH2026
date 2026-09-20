@@ -2,6 +2,10 @@
 
 > **Version 2 changes:** (1) OpenRouter is now the default provider for LLM + STT + TTS (Section 4.1, Section 13). (2) The data plan now uses **real official sources first** (NQR, NABARD PLP, data.gov.in) with a human-verified ingestion pipeline; synthetic data is only for things that are not public (Section 14, Phase 1B).
 
+> **Version 3 changes:** Section 1 now contains the **full official problem statement description** (background, GIA issues, detailed description, expected solution) plus a requirement-to-spec checklist. Scope now includes a **mobile-friendly voice web app with kiosk mode** as a primary deliverable, extra profile fields (physical constraints, local opportunities), skill-gap output, and dashboard views for planning/placement/coordination.
+
+> **Version 4 changes:** Added Section 0.1 **Decisions already made** (web app first, not a native Android app; MERN is allowed because the official text mandates no tech stack; Twilio is channel-only; Twilio trial constraints). Phase 3 is now explicitly the mobile-friendly **voice web app**. Section 10.3 lists the Twilio trial limits for calls.
+
 > **How to use this file (for the human):** Put this file in the root of the project folder. In Antigravity, start the first chat with:
 > *"Read PROJECT_SPEC.md fully. Summarise the problem statement and the plan back to me in simple words. Do NOT write any code yet. Then ask me any questions you have."*
 > After that, build **one phase at a time** (see Section 12). Commit to git after every working step.
@@ -26,6 +30,23 @@
 
 ---
 
+### 0.1 Decisions already made (do not re-debate; ask the human if you think one should change)
+
+1. **Deliverable form:** a **mobile-friendly, responsive web app (PWA) + backend**, not a native Android app. The official text asks for an "application" and "lightweight mobile or kiosk-based" solutions but does not mandate Android. A web app opens on any phone or kiosk browser with no install. If required later, it can be wrapped as an installable app.
+2. **Build order (channels):** (1) backend brain (text) → (2) voice web app → (3) officer dashboard → (4) WhatsApp voice notes → (5) IVR/call (simulated first, real only if time). Web app comes first; WhatsApp and call are extra doors into the same backend.
+3. **Tech stack:** the official problem statement does **not** mandate any stack. The human chose **MERN** (Node.js/Express, MongoDB, React). Do not introduce another language or framework without asking.
+4. **Twilio is only the channel layer** (WhatsApp and calls). Speech-to-text, text-to-speech, LLM reasoning, recommendations, database and dashboard are **not** Twilio; they are our backend, OpenRouter (default), MongoDB and React.
+5. **Twilio trial facts the code and plan must respect** (verify against current Twilio docs before relying on them):
+   - The trial account expires about **30 days after sign-up**, so do not spend time on Twilio setup until the WhatsApp/call phase.
+   - Messages and calls go only to **verified numbers (up to 5)**, and trial voice calls are restricted to the **sign-up country (India)**.
+   - The **WhatsApp sandbox number and the Voice trial number are different**; the WhatsApp number cannot take calls.
+   - Trial accounts have **restrictions on custom TwiML** (some verbs are blocked) and on WhatsApp templates. **Test early** whether `<Gather input="speech">` and free-form WhatsApp replies work on the trial account.
+   - A publicly callable number (including a **1800 toll-free** number) is a **production/paid** telecom item and is out of scope for the prototype. The prototype uses the Twilio trial number for a live demo to verified phones, plus a browser simulation and a recorded call video as backup.
+6. **Data:** one pilot district and 3-5 sectors, real official sources through the verified ingestion pipeline (Section 14), synthetic data only for non-public items.
+7. **Honesty:** never claim jobs, seats, funding, demand or dialect support that we have not verified or tested (Sections 3 and 14).
+
+---
+
 ## 1. The Hackathon Problem Statement (official details)
 
 | Field | Value |
@@ -38,11 +59,72 @@
 | Category | Software |
 | Theme | Agriculture, FoodTech & Rural Development |
 
-### Description (as given on the portal)
+### Description (official text from the SIH portal)
 
-The Pradhan Mantri Anusuchit Jaati Abhyuday Yojana (PM-AJAY) aims to reduce poverty among Scheduled Caste (SC) communities through livelihood promotion, skill development, and enterprise support under its Grant-in-Aid (GIA) component. A major challenge in implementation is the identification of appropriate skill training pathways that align with both the aspirations of beneficiaries and local livelihood opportunities. The required system should **replace traditional form-filling with regional-language voice dialogue interactions for beneficiary profiling**. It should leverage **AI and low-tech deployment channels like IVR and WhatsApp voice notes** to **recommend suitable NSQF-aligned training programs and livelihood opportunities**.
+**Background**
+- The Pradhan Mantri Anusuchit Jaati Abhyuday Yojana (PM-AJAY) aims to reduce poverty among Scheduled Caste (SC) communities through livelihood promotion, skill development, and enterprise support under its Grant-in-Aid (GIA) component. A major challenge in implementation is the identification of appropriate skill training pathways that align with both the aspirations of beneficiaries and the actual livelihood opportunities available in their local regions.
+- Many target beneficiaries face barriers such as low digital literacy, limited awareness of modern trades, language constraints, and difficulty navigating text-heavy digital systems. As a result, there is often a mismatch between enrolled training programs and the beneficiary's interests, capabilities, or local market demand, leading to high dropout rates and poor post-training employment outcomes.
+- To improve inclusion and effectiveness, there is a need for an AI-enabled conversational system that can interact naturally in regional languages and dialects, understand beneficiary aspirations, assess skill gaps, and recommend suitable NSQF-aligned livelihood opportunities in and around the beneficiary.
 
-> Note: the portal screenshot's description was partially cut off; the human has provided the text above. If more official detail is found, the human will update this section.
+**Basic issues under the GIA component**
+- Lack of proper road map and planning of the Perspective Plans from execution to implementation
+- Identification of the participants; trained and skilled financial consultants
+- Job placement issue after the skilling programme
+- Coordination issues among the corporation, Ministry/Departments
+- Inadequate technical and support team at ground level
+
+**Detailed description**
+The proposed solution should be an AI-driven, multilingual, voice-based virtual livelihood assistant capable of conducting conversational interviews with beneficiaries from aspirational SC communities. Instead of relying on traditional form-filling methods, the system should use voice interactions to collect information such as:
+- Educational background
+- Existing or traditional family occupations
+- Current livelihood activities
+- Skills and interests
+- Mobility and physical constraints
+- Preference for self-employment or wage employment
+- Local economic realities and opportunities
+
+The assistant should support regional languages and dialects to ensure accessibility for users with low literacy or limited digital exposure. The interaction should feel **empathetic and conversational rather than administrative**.
+
+The collected information should be analyzed using AI/ML-based profiling and recommendation mechanisms to identify:
+- Suitable NSQF-aligned training programs
+- Relevant trades and livelihood pathways
+- Skill gaps requiring intervention
+- Region-specific employment or enterprise opportunities
+
+The system should also function effectively in low-connectivity and low-tech environments through deployment channels such as:
+- IVR-based phone calls for feature phone users
+- WhatsApp voice-note interfaces
+- Lightweight mobile or kiosk-based solutions
+
+**Expected solution**
+An AI-powered multilingual voice assistant **application** designed to help SC beneficiaries under PM-AJAY identify suitable skill training and livelihood opportunities. The app will support regional languages and local dialects, allowing users to interact through simple voice conversations instead of text-based forms.
+
+> Source: text supplied by the human from the official portal (SIH 2026, PS 26097). The `beneficiary's` apostrophe was repaired from a copy-paste encoding error. If the portal is updated, the human will update this section.
+
+### Requirement checklist (official requirement -> where this spec covers it)
+
+| Official requirement | Covered in |
+|---|---|
+| Voice dialogue instead of form-filling | Sections 8, 10 |
+| Regional languages and dialects | Sections 4.1, 8 (language packs), 16 (accent testing) |
+| Collect: education, traditional/family occupation, current livelihood, skills/interests, mobility **and physical constraints**, self vs wage preference, **local economic realities and opportunities** | Section 7 (Beneficiary), Section 8 (states) |
+| Empathetic, conversational tone | Section 3 rule 12, Section 8 |
+| AI/ML-based profiling and recommendation | Sections 8, 9, 15 |
+| Output: NSQF-aligned programs, trades/pathways, **skill gaps**, region-specific employment/enterprise opportunities | Sections 9, 14 |
+| IVR for feature phones | Section 10.3 |
+| WhatsApp voice-note interface | Section 10.2 |
+| Lightweight mobile or **kiosk** solution | Section 10.1 |
+| Expected: a multilingual voice assistant **application** | Section 10.1 (mobile-friendly voice web app is a primary deliverable) |
+
+### How the GIA "basic issues" relate to our solution (use in PPT)
+
+| GIA issue | What our prototype does | Honest limit |
+|---|---|---|
+| No proper roadmap / planning of Perspective Plans | Dashboard shows aggregated interests, sector demand and training gaps by district, which can inform planning | Uses prototype/synthetic conversations; real planning needs real deployment data |
+| Identifying skilled financial consultants | Bot's next step can advise contacting the local officer/bank; officer notes can record referrals | Not solved in the prototype; future scope (directory of consultants) |
+| Job placement after skilling | Recommends pathways tied to local opportunities and tracks pathway status fields (referred / enrolled / completed / placed) | Status values are officer-entered or synthetic in the demo |
+| Coordination among Corporation / Ministry / Departments | One shared officer dashboard with verified evidence and notes | Real inter-department integration is future scope |
+| Inadequate technical/support team on the ground | Voice-first, assisted/kiosk mode lets a field worker help a beneficiary with no typing | Needs pilot testing with real field staff |
 
 ### Plain-language interpretation
 
@@ -50,6 +132,8 @@ The Pradhan Mantri Anusuchit Jaati Abhyuday Yojana (PM-AJAY) aims to reduce pove
 - **What is the problem?** It is hard for them (and for scheme officers) to decide *which training course or livelihood* suits this person given their education, current work, interests and local area.
 - **What must we build?** A voice-first AI assistant. The person **speaks in their own language** (Hindi first) over **WhatsApp voice notes** or **a phone call (IVR)**. The assistant asks simple questions, builds a profile, and recommends **NSQF-aligned training programs** plus **local livelihood options**, replying **in voice**.
 - **"Livelihood mapping"** = connecting a person's profile to livelihood options that make sense in *their district/area* (e.g. dairy, tailoring, mushroom farming, small shop), and giving officers an aggregated view of what people want and what training is needed where.
+- **The official text also expects:** an *application* (not only a chatbot), **regional languages and dialects**, an **empathetic** tone, **skill-gap analysis**, awareness of **local economic realities**, and channels for **feature phones (IVR), WhatsApp voice notes, and lightweight mobile/kiosk** use.
+- **Mismatch problem:** the background says training that does not match a person's interests, capabilities and local demand leads to dropouts and poor placement. So recommendations must weigh **aspiration + capability + local opportunity together**, not just education.
 - **NSQF** = National Skills Qualification Framework (levels 1–10) that classifies qualifications by the knowledge/skill level. Recommendations must mention the NSQF level and avoid suggesting levels far above the person's education.
 
 ---
@@ -61,18 +145,18 @@ The Pradhan Mantri Anusuchit Jaati Abhyuday Yojana (PM-AJAY) aims to reduce pove
 
 ### MUST HAVE (MVP — build in this order)
 1. **Backend "brain"** that works with **text input**: conversation → structured profile → recommendations.
-2. **Browser mic demo page** (React): speak → bot replies with voice + text. This is also the backup for the live demo.
+2. **Mobile-friendly voice web app** (React PWA) with a **kiosk mode**: speak → bot replies with voice + text. The official expected solution is a multilingual voice assistant *application*, so this is a **primary deliverable** (Section 10.1) and also the backup for the live demo.
 3. **Officer/Admin dashboard** (React): aggregated insights + list of conversations + a district/sector view (this represents "livelihood mapping").
 4. **WhatsApp voice-note channel** (Twilio WhatsApp Sandbox): receive voice note → reply with voice + text.
 
 ### SHOULD HAVE (if time permits)
 5. **IVR call flow** — first as a *simulated* flow (browser mic + call-flow diagram). Real telephony only if time remains (Twilio `<Gather input="speech">` with Hindi is the simplest path; verify current Twilio docs).
-6. A second language (e.g. Marathi/Bhojpuri/English) using the same architecture.
+6. A **second regional language** beyond Hindi (chosen with the pilot district; English can be a third), using the same architecture. Dialect support = test Hindi STT on regional-accent samples and report accuracy honestly; do not claim dialect models we have not tested.
 
 ### OUT OF SCOPE (mention only as "future scope" in PPT)
 - Real PM-AJAY / government APIs, beneficiary IDs, funding approval or eligibility decisions
 - Real-time training seat availability
-- More than 2 languages, production telecom setup, full officer workflow engines
+- More than 3 languages, dialect-specific model training, production telecom setup, full officer workflow engines
 
 ---
 
@@ -89,6 +173,7 @@ The Pradhan Mantri Anusuchit Jaati Abhyuday Yojana (PM-AJAY) aims to reduce pove
 9. **Mark data honestly (provenance).** Records imported from official sources must store `sourceUrl`, `retrievedAt` and `isDemo: false` **only after a human has verified them**. Every seeded record that is not verified real data must have `isDemo: true` (or `source: "SAMPLE"`) and the UI must show a small "DEMO DATA" label.
 10. **Graceful failure.** If speech is not understood, ask to repeat; after 2 failures, offer simple options (numbers) or text.
 11. **Low-tech friendly.** Short replies, compressed audio, text fallback along with audio.
+12. **Empathetic, not administrative.** The official brief asks for a conversational, empathetic feel. Greet warmly, acknowledge answers ("achha, silai ka kaam aata hai, yeh toh achhi baat hai"), never sound like a form, never make the person feel judged for low education, and never ask for sensitive details (caste certificate, Aadhaar, bank details) in the conversation. Physical constraints are asked gently and are optional.
 
 ---
 
@@ -292,6 +377,9 @@ backend/
   workPreference,      // "wage" | "self" | "either" | "unknown"
   willingToMigrate: Boolean | null,
   travelRadiusKm: Number | null,
+  physicalConstraints: [String],        // voluntary, e.g. "cannot stand for long" (optional, gently asked)
+  localOpportunitiesReported: [String], // what the person says about work/demand around them ("USER REPORTED", not verified)
+  incomeExpectation: String | null,
   fieldConfidence: { education: 0..1, ... },
   isDemo: Boolean, createdAt
 }
@@ -303,7 +391,7 @@ backend/
   _id, sessionId, beneficiaryId, channel, language,
   state,               // current step of the state machine
   turns: [{ role: "user"|"bot", text, at, audioRef?: String }],
-  recommendations: [{ type: "course"|"livelihood", refId, reason, rank }],
+  recommendations: [{ type: "course"|"livelihood", refId, reason, skillGap, nextStep, fitFlags, rank }],
   status: "in_progress" | "completed" | "abandoned",
   createdAt, updatedAt
 }
@@ -318,12 +406,15 @@ Raw audio: **do not persist** beyond processing (delete temp files). Store trans
 ```
 START → CONSENT → LANGUAGE (optional) → ASK_LOCATION → ASK_AGE → ASK_EDUCATION
 → ASK_CURRENT_WORK → ASK_SKILLS → ASK_INTEREST → ASK_WORK_PREFERENCE
-→ ASK_MOBILITY → CONFIRM_PROFILE → RECOMMEND → FOLLOWUP (questions / "kuch aur dikhao") → END
+→ ASK_MOBILITY_AND_CONSTRAINTS → ASK_LOCAL_OPPORTUNITIES → CONFIRM_PROFILE → RECOMMEND → FOLLOWUP (questions / "kuch aur dikhao") → END
 ```
 - If the user gives multiple answers in one voice note, the extractor fills multiple fields and the engine **skips** already-answered states.
 - If a required field is missing, ask **one** short question for it.
 - **CONFIRM_PROFILE** reads back the profile in one or two simple sentences and asks "sahi hai?". If "nahi", ask which part is wrong and correct it.
-- All bot sentences live in `messages.hi.js` so non-coder teammates can edit the Hindi wording without touching logic.
+- **ASK_MOBILITY_AND_CONSTRAINTS:** willingness to move, travel distance, and (gently, optional) any physical limitation.
+- **ASK_LOCAL_OPPORTUNITIES:** ask what work or business the person sees around them ("aapke gaon/aas-paas mein kaunsa kaam achha chalta hai?"). Store as `localOpportunitiesReported` (USER REPORTED) and use it as a *signal* next to our verified data, never as proof of demand.
+- All bot sentences live in per-language files (`messages.hi.js`, `messages.en.js`, later `messages.<lang>.js`) so non-coder teammates can edit wording without touching logic. The engine must be language-agnostic: it only asks the message layer for a line by key.
+- Tone: follow Rule 12 (empathetic, conversational). Keep an "acknowledgement line" before each next question.
 
 ### Example (target behaviour)
 > **User (voice):** "Main 10th pass hoon, gaon mein rehta hoon, silai aati hai. Kuch kamana chahta hoon par gaon chhodna nahi chahta."
@@ -353,17 +444,24 @@ Pipeline in `recommender.js`:
 4. **Validation:** every returned ID must exist in the candidate list. Drop any that do not. If fewer than needed, fill from the rule-based ranking.
 5. **Safe wording:** attach a fixed disclaimer line to every result (availability to be confirmed with training centre / officer; no guarantee of job or funding).
 6. **Empty result handling:** if nothing matches, say so honestly and ask a follow-up question or suggest speaking to a local officer. Never force a recommendation.
-7. Save recommendations in `Conversation.recommendations` (used by dashboard).
+7. **Skill gap and fit flags** (the official brief asks for skill-gap analysis and warns about aspiration/local-demand mismatch): for each recommendation compute
+   - `skillGap`: what the person still needs (compare their stated skills/education with the course's job roles and entry requirements; unknown stays unknown),
+   - `fitFlags`: `{ aspirationMatch, educationMatch, mobilityMatch, localOpportunityMatch }` each `"good" | "partial" | "unknown"`, derived by plain rules where possible. Show the flags in the dashboard and use them to warn about poor-fit recommendations (dropout risk).
+8. Save recommendations in `Conversation.recommendations` (used by dashboard).
 
 ---
 
 ## 10. Channels
 
-### 10.1 Browser mic demo (build first, this is also the demo backup)
+### 10.1 Mobile-friendly voice web app + kiosk mode (build first; primary deliverable and demo backup)
 - React page with a big mic button (`MediaRecorder`), shows transcript bubbles, plays the bot's audio reply, also shows text.
 - Endpoint: `POST /api/chat/message` with `multipart/form-data` (`audio` file) or JSON (`text`) + `sessionId`.
 - Response: `{ sessionId, botText, botAudioUrl, state, profileSummary?, recommendations? }`.
 - Include a "type instead" text box for debugging and a "start over" button.
+- **Mobile-first PWA:** installable, works well on a phone browser, big touch targets, minimal text, icons plus labels, works on slow networks (small payloads, audio compressed, clear loading state).
+- **Language selector** with large buttons (Hindi, English, second regional language), also spoken aloud on first screen.
+- **Kiosk mode** (`?kiosk=1`): full-screen, one big "Bolna shuru karein" button, on-screen text kept large, auto-resets after the conversation ends or after inactivity, and a "field worker assisted" toggle so an officer can help a beneficiary without typing. Never shows other users' data.
+- Show the recommendation as simple cards (icon, title, NSQF level, one-line reason) in addition to reading it aloud.
 
 ### 10.2 WhatsApp (Twilio Sandbox)
 - Webhook: `POST /webhooks/whatsapp` (Twilio sends `application/x-www-form-urlencoded`; use `express.urlencoded`).
@@ -380,6 +478,8 @@ Pipeline in `recommender.js`:
 ### 10.3 IVR (optional; simulate first)
 - **Simulated IVR (must do):** `docs/call-flow.md` with a mermaid diagram of the call flow (language menu → consent → questions → recommendations → repeat/exit) + the browser mic page labelled "IVR simulation".
 - **Real IVR (if time):** Twilio Voice webhook `POST /webhooks/ivr/start` returns TwiML with `<Gather input="speech" language="hi-IN" action="/webhooks/ivr/answer">` and `<Say language="hi-IN">`. Twilio's speech result can go straight to the conversation engine (no separate STT). Trial accounts can call only verified numbers and Indian number availability may be limited — check current Twilio/Exotel docs and tell the human the limitations before starting.
+- **Twilio trial limits for calls (see Section 0.1):** verified numbers only (max 5), calls within India only, the Voice trial number is separate from the WhatsApp sandbox number, and some TwiML verbs may be blocked. Before writing IVR code, the human checks the Console's "Try out Voice" page (dial the trial number from a verified phone) and Twilio's "Custom TwiML during trial" reference, then tells the agent whether `<Gather>` speech works. If it does not, fall back to the simulated IVR (browser page + call-flow diagram + recorded call video).
+- **Public number:** a real callable 1800/toll-free number needs an Indian telecom/IVR provider (paid, KYC). Not part of the prototype; mention as production step in the PPT.
 
 ---
 
@@ -391,6 +491,10 @@ Pages:
 3. **Education & work preference distribution:** bar/pie charts.
 4. **Conversations list + detail:** anonymised (show partial name/phone hash, not full phone number), profile summary, recommendations with reasons, "DEMO" badge where applicable.
 5. **Officer notes (optional):** a verification checklist per case — "training availability confirmed?", "eligibility verified by officer?", note field. This shows human-in-the-loop.
+6. **Planning and placement view (addresses the GIA issues):**
+   - *Perspective-plan insights:* aggregated sector interest vs available training by district/block, top unmet training needs, and a list of poor-fit flags (aspiration vs local opportunity mismatch) that indicate dropout risk.
+   - *Pathway status tracker:* per case, `referred → enrolled → completed → placed/started enterprise`. In the prototype these are officer-entered or synthetic and must be labelled DEMO.
+   - *Coordination:* a shareable, anonymised summary export (CSV/PDF) that different departments can use.
 
 Endpoints (examples):
 ```
@@ -432,11 +536,11 @@ POST /api/admin/seed-demo         (creates ~100 synthetic conversations flagged 
 - Add tests / a script `npm run chat-cli` to talk to the bot in the terminal.
 - **Done when:** a Hindi/Hinglish text conversation reaches recommendations correctly and invalid LLM output is handled.
 
-### Phase 3 — Browser voice
+### Phase 3 — Voice web app (mobile-friendly, kiosk mode)
 - **First run the audio benchmark** (`npm run benchmark:audio`): feed 10-15 Hindi recordings from teammates (include noisy, soft-voice and mixed Hindi-English samples) through the chosen STT model and print transcript + latency; synthesize ~5 typical bot sentences through TTS and save the files so a human can listen. The human decides go/no-go for the provider and records the decision in the README.
 - Implement `stt.js`, `tts.js`, `audio.js` (OpenRouter by default, per Section 4.1); extend `/api/chat/message` to accept audio.
 - Support `MOCK_AI=true` so the UI can be built without spending credits.
-- Build `VoiceDemo.jsx`.
+- Build the mobile-friendly voice web app per Section 10.1 (`VoiceDemo.jsx` and supporting components): language selector with big buttons, consent screen, mic button, spoken + text replies, recommendation cards, and kiosk mode (`?kiosk=1`).
 - **Done when:** speaking Hindi in the browser produces a spoken Hindi reply with the same recommendations logic.
 
 ### Phase 4 — Dashboard
@@ -631,6 +735,11 @@ Never promise jobs, funding or seats. Return ONLY valid JSON:
 - [ ] `MOCK_AI=true` mode works end to end
 - [ ] Every Course/Livelihood shown to users has a source and retrieval date; unverified records show DEMO DATA
 - [ ] Recommendations never include an item that is not in MongoDB
+- [ ] Bot tone check: teammates rate 10 conversations for "empathetic, not like a form"
+- [ ] Physical-constraint and local-opportunity questions work, and skipping them is allowed
+- [ ] Mobile phone browser test (real low-end Android) and kiosk mode auto-reset
+- [ ] Skill gap and fit flags shown for each recommendation; unknown values shown as unknown
+- [ ] Hindi test set includes regional-accent speakers; report accuracy per speaker honestly
 - [ ] Dashboard numbers match database
 
 ---
