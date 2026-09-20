@@ -3,8 +3,8 @@ dist
 .env
 .DS_Store
 .vscode/
-data/raw/*
-!data/raw/.gitkeep
-data/staging/*
-!data/staging/.gitkeep
+backend/data/raw/*
+!backend/data/raw/.gitkeep
+backend/data/staging/*
+!backend/data/staging/.gitkeep
 PROJECT_SPEC.md

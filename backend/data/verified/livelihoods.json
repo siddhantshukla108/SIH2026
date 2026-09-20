@@ -1,0 +1,19 @@
+[
+  {
+    "title": "EXAMPLE_LIVELIHOOD",
+    "type": "self-employment",
+    "district": "PILOT_DISTRICT",
+    "state": "PILOT_STATE",
+    "sector": "EXAMPLE_SECTOR",
+    "minEducation": "none",
+    "startupCostRange": null,
+    "demandSignal": "unknown",
+    "sourceName": "NABARD PLP",
+    "sourceUrl": "https://www.nabard.org/",
+    "sourceDoc": "example_plp.pdf",
+    "sourceExcerpt": "",
+    "retrievedAt": "2026-09-20",
+    "verified": false,
+    "isDemo": true
+  }
+]

@@ -5,17 +5,26 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "import:verified": "node src/scripts/importVerified.js",
+    "extract:qfiles": "node src/scripts/extractQFiles.js",
+    "extract:plp": "node src/scripts/extractPlp.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "chat-cli": "node src/scripts/chatCli.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "axios": "^1.20.0",
     "cors": "^2.8.6",
     "dotenv": "^18.0.1",
     "express": "^5.2.1",
-    "mongoose": "^9.10.1"
+    "form-data": "^4.0.6",
+    "mongoose": "^9.10.1",
+    "multer": "^2.4.0",
+    "pdf-parse": "^2.4.5",
+    "uuid": "^14.0.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

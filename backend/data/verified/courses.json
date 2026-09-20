@@ -1,0 +1,18 @@
+[
+  {
+    "title": "EXAMPLE_QUALIFICATION_TITLE",
+    "titleHi": "",
+    "sector": "EXAMPLE_SECTOR",
+    "nsqfLevel": 3,
+    "minEducation": "5th",
+    "durationHours": null,
+    "jobRoles": ["EXAMPLE_JOB_ROLE"],
+    "sourceName": "NQR",
+    "sourceUrl": "https://www.nqr.gov.in/",
+    "sourceDoc": "example_qfile.pdf",
+    "sourceExcerpt": "",
+    "retrievedAt": "2026-09-20",
+    "verified": false,
+    "isDemo": true
+  }
+]
