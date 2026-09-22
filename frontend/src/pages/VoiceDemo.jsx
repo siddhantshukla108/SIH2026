@@ -155,7 +155,7 @@ export default function VoiceDemo() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden">
+    <div className="w-full min-h-full flex flex-col">
       
       {/* Top status bar */}
       <div className="flex justify-between items-center px-4 sm:px-8 lg:px-12 py-3 shrink-0">
@@ -179,7 +179,7 @@ export default function VoiceDemo() {
       </div>
 
       {/* Main Content */}
-      <div className={`flex flex-col lg:flex-row items-center justify-between w-full mx-auto flex-1 px-4 sm:px-8 lg:px-12 py-6 lg:py-0 transition-all duration-500 ease-in-out ${isChatExpanded ? 'max-w-7xl' : 'max-w-6xl'}`}>
+      <div className={`flex flex-col lg:flex-row items-center lg:items-center justify-start lg:justify-between w-full mx-auto flex-1 px-4 sm:px-8 lg:px-12 pt-2 pb-12 lg:py-0 transition-all duration-500 ease-in-out ${isChatExpanded ? 'max-w-7xl' : 'max-w-6xl'}`}>
         
         {/* ───── Left: Text & CTA ───── */}
         <div className={`lg:w-1/2 w-full text-center lg:text-left z-10 transition-all duration-500 ease-in-out ${isChatExpanded ? 'opacity-0 scale-95 hidden' : 'opacity-100 scale-100 block'}`}>
@@ -220,7 +220,7 @@ export default function VoiceDemo() {
               </span>
             </button>
             <button className="bg-white hover:bg-gray-50 text-[var(--color-sahayak-sidebar)] border border-gray-200 pl-6 pr-5 py-3 rounded-xl font-semibold flex items-center gap-3 text-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5">
-              Talk to shahayak
+              Talk to Sahayak
               <BookOpen size={15} />
             </button>
           </div>
