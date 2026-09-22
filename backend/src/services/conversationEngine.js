@@ -11,6 +11,7 @@ const Conversation = require('../models/Conversation');
 const Beneficiary = require('../models/Beneficiary');
 const { extractProfile, findMissingFields } = require('./profileExtractor');
 const { getRecommendations, buildProfileSummary } = require('./recommender');
+const { generateResponse } = require('./responseGenerator');
 const messagesHi = require('./messages.hi');
 
 // Ordered states for the conversation flow
@@ -101,8 +102,8 @@ async function handleMessage({ sessionId, channel = 'web', text, language = 'hi'
     });
     await conversation.save();
 
-    // Return welcome message
-    const botText = messagesHi.welcome.question;
+    // Return welcome message using LLM to respect the selected language
+    const botText = await generateResponse(text, 'START', language, beneficiary.toObject());
     conversation.turns.push({ role: 'bot', text: botText, at: new Date() });
     conversation.state = 'CONSENT';
     await conversation.save();
@@ -134,7 +135,7 @@ async function handleMessage({ sessionId, channel = 'web', text, language = 'hi'
   conversation.turns.push({ role: 'user', text, at: new Date() });
 
   // Process based on current state
-  const result = await processState(conversation, beneficiary, text);
+  const result = await processState(conversation, beneficiary, text, language);
 
   // Record bot turn
   conversation.turns.push({ role: 'bot', text: result.botText, at: new Date() });
@@ -162,23 +163,26 @@ async function handleMessage({ sessionId, channel = 'web', text, language = 'hi'
 /**
  * Process the current state and return the bot's response + next state
  */
-async function processState(conversation, beneficiary, userText) {
+async function processState(conversation, beneficiary, userText, language) {
   const currentState = conversation.state;
   const msgs = messagesHi;
 
   // -- CONSENT state --
   if (currentState === 'CONSENT') {
     const positive = isPositiveResponse(userText);
+    console.log('[Engine] CONSENT state, positive:', positive);
     if (positive) {
       beneficiary.consentGiven = true;
+      const botText = await generateResponse(userText, 'ASK_LOCATION', language, beneficiary.toObject());
       return {
-        botText: msgs.askLocation.question,
+        botText,
         nextState: 'ASK_LOCATION',
       };
     } else {
       beneficiary.consentGiven = false;
+      const botText = await generateResponse(userText, 'END', language, beneficiary.toObject());
       return {
-        botText: msgs.consent.denied,
+        botText,
         nextState: 'END',
       };
     }
@@ -187,14 +191,16 @@ async function processState(conversation, beneficiary, userText) {
   // -- CONFIRM_PROFILE state --
   if (currentState === 'CONFIRM_PROFILE') {
     const positive = isPositiveResponse(userText);
+    console.log('[Engine] CONFIRM_PROFILE state, positive:', positive, '| userText:', userText);
     if (positive) {
       // Profile confirmed — get recommendations
-      return await generateRecommendations(beneficiary, msgs);
+      return await generateRecommendations(beneficiary, msgs, language);
     } else {
       // Ask what's wrong
+      const botText = await generateResponse(userText, 'ASK_LOCATION', language, beneficiary.toObject());
       return {
-        botText: msgs.confirmProfile.incorrect,
-        nextState: 'ASK_LOCATION', // Go back to re-ask (simplified approach)
+        botText,
+        nextState: 'ASK_LOCATION', // Go back to re-ask
       };
     }
   }
@@ -205,10 +211,11 @@ async function processState(conversation, beneficiary, userText) {
                       userText.toLowerCase().includes('dikhao') ||
                       userText.toLowerCase().includes('more');
     if (wantsMore) {
-      return await generateRecommendations(beneficiary, msgs);
+      return await generateRecommendations(beneficiary, msgs, language);
     } else {
+      const botText = await generateResponse(userText, 'END', language, beneficiary.toObject());
       return {
-        botText: msgs.end.message,
+        botText,
         nextState: 'END',
       };
     }
@@ -216,17 +223,20 @@ async function processState(conversation, beneficiary, userText) {
 
   // -- RECOMMEND state (user responded after seeing recommendations) --
   if (currentState === 'RECOMMEND') {
+    const botText = await generateResponse(userText, 'FOLLOWUP', language, beneficiary.toObject());
     return {
-      botText: msgs.followup.question,
+      botText,
       nextState: 'FOLLOWUP',
     };
   }
 
   // -- All ASK_* states: extract profile and advance --
+  console.log('[Engine] ASK state:', currentState, '| Extracting profile...');
   const history = conversation.turns.map(t => ({ role: t.role, text: t.text }));
   const profileObj = beneficiary.toObject();
   
   const extraction = await extractProfile(userText, profileObj, history);
+  console.log('[Engine] Extracted fields:', JSON.stringify(extraction.extractedFields));
 
   // Update beneficiary with extracted fields
   for (const [key, value] of Object.entries(extraction.extractedFields)) {
@@ -252,43 +262,33 @@ async function processState(conversation, beneficiary, userText) {
 
   // Determine next state: skip states whose fields are already filled
   const nextState = findNextState(currentState, beneficiary);
+  console.log('[Engine] Current:', currentState, '→ Next:', nextState);
+  console.log('[Engine] Profile snapshot:', JSON.stringify({
+    state: beneficiary.state,
+    district: beneficiary.district,
+    ageRange: beneficiary.ageRange,
+    education: beneficiary.education,
+    currentWork: beneficiary.currentWork,
+    skills: beneficiary.skills,
+    interests: beneficiary.interests,
+    workPreference: beneficiary.workPreference,
+    willingToMigrate: beneficiary.willingToMigrate,
+    localOpportunitiesReported: beneficiary.localOpportunitiesReported,
+  }));
 
   // If we've collected enough, go to CONFIRM_PROFILE
   if (nextState === 'CONFIRM_PROFILE') {
     const summary = buildHindiProfileSummary(beneficiary);
-    const question = msgs.confirmProfile.question.replace('{profileSummary}', summary);
+    const botText = await generateResponse(userText, 'CONFIRM_PROFILE', language, beneficiary.toObject(), summary);
     return {
-      botText: question,
+      botText,
       nextState: 'CONFIRM_PROFILE',
       profileSummary: summary,
     };
   }
 
-  // Get the message for the next state
-  const msgKey = STATE_MSG_MAP[nextState];
-  const stateMsg = msgs[msgKey];
-
-  if (!stateMsg) {
-    // Shouldn't happen, but fallback
-    return {
-      botText: msgs.error.notUnderstood,
-      nextState: currentState,
-    };
-  }
-
-  // Build acknowledgement + next question
-  let botText = '';
-  
-  // Add acknowledgement from current state
-  const currentMsgKey = STATE_MSG_MAP[currentState];
-  const currentMsg = msgs[currentMsgKey];
-  if (currentMsg && currentMsg.ack && currentMsg.ack.length > 0) {
-    const ackTemplate = currentMsg.ack[Math.floor(Math.random() * currentMsg.ack.length)];
-    const ack = fillTemplate(ackTemplate, beneficiary);
-    botText = ack + ' ';
-  }
-
-  botText += stateMsg.question;
+  // Use LLM to generate the final string
+  const botText = await generateResponse(userText, nextState, language, beneficiary.toObject());
 
   return {
     botText,
@@ -330,48 +330,26 @@ function findNextState(currentState, beneficiary) {
 /**
  * Generate recommendations and format the response
  */
-async function generateRecommendations(beneficiary, msgs) {
+async function generateRecommendations(beneficiary, msgs, language) {
+  console.log('[Engine] ★ GENERATING RECOMMENDATIONS ★');
   const profile = beneficiary.toObject();
   const results = await getRecommendations(profile);
+  console.log('[Engine] Recommendations result:', results.courses.length, 'courses,', results.livelihoods.length, 'livelihoods');
 
   if (results.courses.length === 0 && results.livelihoods.length === 0) {
     return {
-      botText: msgs.recommend.noResults,
+      botText: await require('./responseGenerator').generateResponse('I want recommendations', 'FOLLOWUP', language, profile, 'No recommendations found.'),
       nextState: 'FOLLOWUP',
       recommendations: [],
     };
   }
 
-  // Format recommendations as Hindi text
-  let botText = msgs.recommend.intro
-    .replace('{courseCount}', results.courses.length)
-    .replace('{livelihoodCount}', results.livelihoods.length);
-  botText += '\n\n';
+  const rawTextForLLM = `I found ${results.courses.length} courses and ${results.livelihoods.length} livelihoods.\n` +
+    `Courses: ${results.courses.map(r => r.title || r.refId).join(', ')}.\n` +
+    `Livelihoods: ${results.livelihoods.map(r => r.title || r.refId).join(', ')}.\n` +
+    `Disclaimer: These are just suggestions. Confirm with an officer.`;
 
-  if (results.courses.length > 0) {
-    botText += '📚 Training ke vikalp:\n';
-    for (const rec of results.courses) {
-      // Find the course to get title and NSQF level
-      const course = await require('../models/Course').findById(rec.refId).lean();
-      if (course) {
-        botText += `${rec.rank}. ${course.titleHi || course.title} (NSQF Level ${course.nsqfLevel}). ${rec.reason}\n`;
-      }
-    }
-    botText += '\n';
-  }
-
-  if (results.livelihoods.length > 0) {
-    botText += '💼 Kaam ke vikalp:\n';
-    for (const rec of results.livelihoods) {
-      const livelihood = await require('../models/Livelihood').findById(rec.refId).lean();
-      if (livelihood) {
-        botText += `${rec.rank}. ${livelihood.titleHi || livelihood.title}. ${rec.reason}\n`;
-      }
-    }
-    botText += '\n';
-  }
-
-  botText += msgs.recommend.disclaimer;
+  const botText = await require('./responseGenerator').generateResponse('I want recommendations', 'RECOMMEND', language, profile, rawTextForLLM);
 
   // Format recommendations for storage
   const storedRecs = [

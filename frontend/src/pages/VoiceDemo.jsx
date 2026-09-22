@@ -1,15 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { Mic, Square, Loader2, Sparkles, AlertTriangle, ShieldCheck, CheckCircle2, BookOpen, MessageSquare } from 'lucide-react';
+import { Mic, Square, Loader2, Sparkles, AlertTriangle, ShieldCheck, CheckCircle2, BookOpen, MessageSquare, Maximize2, Minimize2 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api';
 
 export default function VoiceDemo() {
+  // Read saved language from localStorage, default to 'Hindi'
+  const savedLang = localStorage.getItem('shayak_language') || 'Hindi';
+  
   const [sessionId, setSessionId] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [turns, setTurns] = useState([]);
   const [error, setError] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState(savedLang);
+  const [isChatExpanded, setIsChatExpanded] = useState(false);
   
   const mediaRecorder = useRef(null);
   const audioChunks = useRef([]);
@@ -24,7 +29,8 @@ export default function VoiceDemo() {
   useEffect(() => {
     if (!hasInitialized.current) {
       hasInitialized.current = true;
-      sendTextMessage('start');
+      // Send start with the language read at mount time
+      sendTextMessage('start', savedLang);
     }
   }, []);
 
@@ -32,11 +38,17 @@ export default function VoiceDemo() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [turns]);
 
-  const sendTextMessage = async (text) => {
+  const sendTextMessage = async (text, langOverride, forceNewSession = false) => {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await axios.post(`${API_BASE}/chat/message`, { sessionId, text, language: 'auto' });
+      const lang = (langOverride || selectedLanguage).toLowerCase();
+      const payload = { 
+        sessionId: forceNewSession ? null : sessionId, 
+        text, 
+        language: lang 
+      };
+      const res = await axios.post(`${API_BASE}/chat/message`, payload);
       if (text !== 'start') setTurns(prev => [...prev, { role: 'user', text }]);
       handleBotResponse(res.data);
     } catch (err) {
@@ -84,7 +96,7 @@ export default function VoiceDemo() {
     const formData = new FormData();
     formData.append('audio', audioBlob, 'recording.webm');
     if (sessionId) formData.append('sessionId', sessionId);
-    formData.append('language', 'auto');
+    formData.append('language', selectedLanguage.toLowerCase());
 
     try {
       const res = await axios.post(`${API_BASE}/chat/message`, formData, {
@@ -112,15 +124,31 @@ export default function VoiceDemo() {
     }
   };
 
+  const restartChat = () => {
+    // Save current language and reload the page for a fully clean session
+    localStorage.setItem('shayak_language', selectedLanguage);
+    window.location.reload();
+  };
+
+  const handleLanguageChange = (lang) => {
+    if (lang === selectedLanguage) return;
+    // Save new language to localStorage and reload the page
+    localStorage.setItem('shayak_language', lang);
+    window.location.reload();
+  };
+
   const fallbackBrowserTTS = (text) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
+      // Always use hi-IN voice — it has the softest, thinnest female tone
+      // and can read English/Hinglish text naturally with an Indian accent
       utterance.lang = 'hi-IN';
       utterance.rate = 0.9;
+      utterance.pitch = 1.1;
       const voices = window.speechSynthesis.getVoices();
-      const prefVoice = voices.find(v => v.lang.includes('hi'));
-      if (prefVoice) utterance.voice = prefVoice;
+      const hindiVoice = voices.find(v => v.lang.includes('hi'));
+      if (hindiVoice) utterance.voice = hindiVoice;
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -134,17 +162,26 @@ export default function VoiceDemo() {
           <ShieldCheck size={15} className="text-[var(--color-shayak-rust)]" />
           A trusted guide for your next step
         </div>
-        <div className="hidden sm:flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full shadow-sm border border-gray-100 text-xs font-medium text-gray-600">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-          Available in 4 languages
+        
+        {/* Language Selector */}
+        <div className="hidden sm:flex items-center bg-gray-100 p-1 rounded-full text-xs font-medium border border-gray-200/60">
+          {['Hindi', 'English', 'Hinglish'].map(lang => (
+            <button 
+              key={lang}
+              onClick={() => handleLanguageChange(lang)}
+              className={`px-3.5 py-1.5 rounded-full transition-all duration-200 ${selectedLanguage === lang ? 'bg-white shadow-sm text-[var(--color-shayak-sidebar)] font-bold' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}
+            >
+              {lang}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Main two-column area */}
-      <div className="flex-1 flex flex-col lg:flex-row items-center lg:items-center px-8 lg:px-12 gap-8 xl:gap-12 overflow-y-auto lg:overflow-hidden">
+      {/* Main Content */}
+      <div className={`flex flex-col lg:flex-row items-center justify-between w-full mx-auto flex-1 px-8 lg:px-12 py-6 lg:py-0 transition-all duration-500 ease-in-out ${isChatExpanded ? 'max-w-7xl' : 'max-w-6xl'}`}>
         
-        {/* ───── Left: Hero Text ───── */}
-        <div className="lg:w-[55%] w-full flex flex-col justify-center text-center lg:text-left py-4 lg:py-0">
+        {/* ───── Left: Text & CTA ───── */}
+        <div className={`lg:w-1/2 w-full text-center lg:text-left z-10 transition-all duration-500 ease-in-out ${isChatExpanded ? 'opacity-0 scale-95 hidden' : 'opacity-100 scale-100 block'}`}>
           
           {/* Badge – w-fit keeps it compact */}
           <div className="w-fit inline-flex items-center gap-2 bg-[var(--color-shayak-rust-light)] text-[var(--color-shayak-rust)] px-4 py-1.5 rounded-full font-bold text-[10px] tracking-[0.15em] mb-5 mx-auto lg:mx-0">
@@ -173,7 +210,7 @@ export default function VoiceDemo() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center gap-3 mx-auto lg:mx-0">
             <button 
-              onClick={() => { if(!isRecording) startRecording(); }}
+              onClick={restartChat}
               className="bg-[var(--color-shayak-sidebar)] hover:bg-[var(--color-shayak-sidebar-hover)] text-white pl-6 pr-5 py-3 rounded-xl font-semibold flex items-center gap-3 text-sm transition-all hover:shadow-xl hover:-translate-y-0.5 group"
             >
               Start with your voice 
@@ -182,7 +219,7 @@ export default function VoiceDemo() {
               </span>
             </button>
             <button className="bg-white hover:bg-gray-50 text-[var(--color-shayak-sidebar)] border border-gray-200 pl-6 pr-5 py-3 rounded-xl font-semibold flex items-center gap-3 text-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5">
-              Browse courses 
+              Talk to shahayak
               <BookOpen size={15} />
             </button>
           </div>
@@ -195,13 +232,17 @@ export default function VoiceDemo() {
         </div>
 
         {/* ───── Right: Chat Widget ───── */}
-        <div className="lg:w-[45%] w-full max-w-[360px] relative flex items-center justify-center py-4 mb-6 lg:mb-0">
+        <div className={`relative flex items-center justify-center py-4 mb-6 lg:mb-0 transition-all duration-500 ease-in-out ${isChatExpanded ? 'w-full max-w-4xl mx-auto h-[75vh]' : 'lg:w-[45%] w-full max-w-[360px]'}`}>
           
           {/* Decorative concentric rings */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[105%] h-[105%] rounded-full border border-gray-200/40 -z-10"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[125%] h-[125%] rounded-full border border-gray-200/20 -z-10"></div>
+          {!isChatExpanded && (
+            <>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[105%] h-[105%] rounded-full border border-gray-200/40 -z-10"></div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[125%] h-[125%] rounded-full border border-gray-200/20 -z-10"></div>
+            </>
+          )}
 
-          <div className="bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] overflow-visible border border-gray-100/80 flex flex-col h-[400px] w-full relative z-10">
+          <div className={`bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] overflow-visible border border-gray-100/80 flex flex-col w-full relative z-10 transition-all duration-500 ${isChatExpanded ? 'h-full' : 'h-[400px]'}`}>
             
             {/* Header */}
             <div className="px-5 py-3.5 flex items-center justify-between border-b border-gray-100 shrink-0">
@@ -214,9 +255,20 @@ export default function VoiceDemo() {
                   <p className="text-[11px] text-gray-400 font-medium">Your guide</p>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_rgba(52,211,153,0.5)]"></div>
-                <span className="text-emerald-500 font-semibold text-[11px]">Listening</span>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_rgba(52,211,153,0.5)]"></div>
+                  <span className="text-emerald-500 font-semibold text-[11px] uppercase tracking-wider">Listening</span>
+                </div>
+                
+                {/* Expand/Minimize Toggle */}
+                <button 
+                  onClick={() => setIsChatExpanded(!isChatExpanded)}
+                  className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1.5 rounded-lg transition-colors ml-1"
+                  title={isChatExpanded ? "Minimize chat" : "Expand chat"}
+                >
+                  {isChatExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                </button>
               </div>
             </div>
 

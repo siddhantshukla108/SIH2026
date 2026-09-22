@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { Compass, MessageSquare, BookOpen, Star, HelpCircle, ArrowRight, Menu, X, LayoutDashboard } from 'lucide-react';
+import { Compass, MessageSquare, BookOpen, Star, HelpCircle, ArrowRight, Menu, X, LayoutDashboard, Lock } from 'lucide-react';
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -101,20 +101,16 @@ export default function Sidebar() {
             </button>
           </div>
 
-          {/* User Profile */}
+          {/* Admin Login */}
           <Link to="/login" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group">
-            <div className="w-10 h-10 rounded-full bg-rose-400 flex items-center justify-center text-white font-bold text-sm shadow-md group-hover:scale-105 transition-transform">
-              MK
+            <div className="w-10 h-10 rounded-full bg-gray-700/50 flex items-center justify-center text-gray-300 font-bold shadow-md group-hover:bg-[var(--color-shayak-rust)] group-hover:text-white transition-all">
+              <Lock size={16} />
             </div>
             <div className="flex-1">
-              <p className="font-semibold text-sm">Meena's journey</p>
-              <p className="text-xs text-gray-400">Profile in progress</p>
+              <p className="font-semibold text-sm text-gray-200 group-hover:text-white transition-colors">Admin Access</p>
+              <p className="text-xs text-gray-400">For officials only</p>
             </div>
-            <div className="flex gap-0.5">
-              <div className="w-1 h-1 rounded-full bg-gray-500"></div>
-              <div className="w-1 h-1 rounded-full bg-gray-500"></div>
-              <div className="w-1 h-1 rounded-full bg-gray-500"></div>
-            </div>
+            <ArrowRight size={14} className="text-gray-500 group-hover:text-white transition-colors" />
           </Link>
         </div>
       </aside>

@@ -62,8 +62,10 @@ function buildExtractionPrompt(currentProfile) {
   return `You are a profile extraction assistant for a Hindi/Hinglish voice conversation system.
 Your job is to extract structured profile fields from the user's message.
 
-The user is a beneficiary from an SC community in India. They speak Hindi or Hinglish.
-Common terms: "dasvi pass" = 10th, "aathvi" = 8th, "silai" = tailoring/sewing, "dudh ka kaam" = dairy, "kheti" = farming/agriculture, "gaon" = village.
+The user is a beneficiary from an SC community in India. They speak Hindi or Hinglish or English.
+Common terms: "dasvi pass" = 10th, "aathvi" = 8th, "silai" = tailoring, "dudh ka kaam" = dairy, "kheti" = farming, "gaon" = village.
+
+CRITICAL INSTRUCTION: You must act as a translator and taxonomy matcher. Regardless of how broken the user's language or spelling is (e.g. "I m intrestd in silai" or "main kheti krta hu"), you MUST map their skills, interests, and current work to EXACT standard English terms (e.g., "tailoring", "farming"). Do NOT output Hindi words in the JSON arrays; translate everything to proper English concepts.
 
 Current known profile:
 ${JSON.stringify(currentProfile, null, 2)}

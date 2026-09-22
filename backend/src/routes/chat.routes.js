@@ -39,7 +39,7 @@ router.post('/message', upload.single('audio'), async (req, res) => {
     // 1. Process STT if audio was uploaded
     if (req.file) {
       try {
-        userText = await transcribeAudio(req.file.path);
+        userText = await transcribeAudio(req.file.path, language);
         // Clean up temp file
         fs.unlinkSync(req.file.path);
       } catch (err) {
