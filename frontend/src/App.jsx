@@ -1,15 +1,16 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Layout from './components/Layout';
 import VoiceDemo from './pages/VoiceDemo';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Conversations from './pages/Conversations';
-import './index.css'; // ensure tailwind is loaded
+import './index.css';
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="App font-sans">
+      <Layout>
         <Routes>
           <Route path="/" element={<VoiceDemo />} />
           <Route path="/login" element={<Login />} />
@@ -17,7 +18,7 @@ function App() {
           <Route path="/conversations" element={<Conversations />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </div>
+      </Layout>
     </BrowserRouter>
   );
 }

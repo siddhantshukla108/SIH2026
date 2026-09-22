@@ -24,40 +24,49 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-full">
+    <div className="flex-1 bg-grid-pattern flex flex-col items-center justify-center p-4 min-h-[calc(100vh-64px)] md:min-h-screen w-full">
+      
+      {/* Branding inside login since it might be standalone or in layout */}
+      <div className="mb-8 flex flex-col items-center">
+        <div className="w-16 h-16 rounded-full bg-[var(--color-shayak-yellow)] flex items-center justify-center text-[var(--color-shayak-sidebar)] font-bold text-3xl shadow-lg mb-4">
+          श
+        </div>
+        <h1 className="font-serif text-3xl font-bold text-[var(--color-shayak-sidebar)] tracking-tight">shayak</h1>
+      </div>
+
+      <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 p-8 max-w-sm w-full animate-slide-up">
         <div className="text-center mb-8">
-          <ShieldCheck size={48} className="mx-auto text-indigo-600 mb-4" />
-          <h1 className="text-2xl font-bold text-slate-800">Officer Login</h1>
-          <p className="text-slate-500 text-sm mt-2">PM-AJAY Livelihood Mapping</p>
+          <ShieldCheck size={40} className="mx-auto text-[var(--color-shayak-rust)] mb-4" />
+          <h2 className="text-xl font-bold text-[var(--color-shayak-sidebar)]">Officer Login</h2>
+          <p className="text-gray-500 font-medium text-sm mt-1">PM-AJAY Livelihood Mapping</p>
         </div>
         
-        {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">{error}</div>}
+        {error && <div className="bg-red-50 text-red-600 p-3 rounded-xl mb-4 text-sm font-medium text-center border border-red-100">{error}</div>}
         
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Username</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
             <input 
               type="text" 
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:border-indigo-500"
+              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[var(--color-shayak-rust)] focus:ring-2 focus:ring-[var(--color-shayak-rust-light)] transition-all font-medium text-gray-700"
               required 
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
             <input 
               type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 border border-slate-300 rounded-lg outline-none focus:border-indigo-500"
+              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[var(--color-shayak-rust)] focus:ring-2 focus:ring-[var(--color-shayak-rust-light)] transition-all font-medium text-gray-700"
               required 
             />
           </div>
           <button 
             type="submit" 
-            className="w-full bg-indigo-600 text-white rounded-lg py-3 font-medium hover:bg-indigo-700 transition"
+            className="w-full bg-[var(--color-shayak-sidebar)] hover:bg-[var(--color-shayak-sidebar-hover)] text-white rounded-xl py-3 font-semibold transition-colors mt-2"
           >
             Login
           </button>
