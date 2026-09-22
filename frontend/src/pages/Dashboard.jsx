@@ -44,7 +44,7 @@ export default function Dashboard() {
 
   if (!summary) return (
     <div className="h-full flex items-center justify-center">
-      <div className="flex items-center gap-3 text-[var(--color-shayak-sidebar)]">
+      <div className="flex items-center gap-3 text-[var(--color-sahayak-sidebar)]">
         <div className="w-6 h-6 border-4 border-current border-t-transparent rounded-full animate-spin"></div>
         <span className="font-semibold text-lg">Loading Dashboard...</span>
       </div>
@@ -57,11 +57,11 @@ export default function Dashboard() {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-[var(--color-shayak-sidebar)] tracking-tight">Officer Dashboard</h1>
+          <h1 className="font-serif text-3xl font-bold text-[var(--color-sahayak-sidebar)] tracking-tight">Officer Dashboard</h1>
           <p className="text-gray-500 font-medium mt-1">PM-AJAY Insights & Analytics</p>
         </div>
         <div className="flex items-center gap-4">
-          <Link to="/conversations" className="flex items-center gap-1 text-[var(--color-shayak-sidebar)] font-semibold hover:text-[var(--color-shayak-rust)] transition-colors px-4 py-2 bg-[var(--color-shayak-beige)] rounded-xl">
+          <Link to="/conversations" className="flex items-center gap-1 text-[var(--color-sahayak-sidebar)] font-semibold hover:text-[var(--color-sahayak-rust)] transition-colors px-4 py-2 bg-[var(--color-sahayak-beige)] rounded-xl">
             Conversations <ChevronRight size={18} />
           </Link>
           <button 
@@ -77,22 +77,22 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:-translate-y-1 transition-transform cursor-pointer group">
           <div className="flex items-center gap-4 mb-4">
-            <div className="bg-[var(--color-shayak-beige)] p-3 rounded-xl group-hover:bg-[var(--color-shayak-yellow)] transition-colors">
-              <Users className="text-[var(--color-shayak-sidebar)]" size={24} />
+            <div className="bg-[var(--color-sahayak-beige)] p-3 rounded-xl group-hover:bg-[var(--color-sahayak-yellow)] transition-colors">
+              <Users className="text-[var(--color-sahayak-sidebar)]" size={24} />
             </div>
             <p className="text-sm text-gray-500 font-semibold uppercase tracking-wide">Total Conversations</p>
           </div>
-          <h2 className="text-4xl font-bold text-[var(--color-shayak-sidebar)]">{summary.totalConversations}</h2>
+          <h2 className="text-4xl font-bold text-[var(--color-sahayak-sidebar)]">{summary.totalConversations}</h2>
         </div>
         
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:-translate-y-1 transition-transform cursor-pointer group">
           <div className="flex items-center gap-4 mb-4">
-            <div className="bg-[var(--color-shayak-rust-light)] p-3 rounded-xl group-hover:bg-[var(--color-shayak-rust)] group-hover:text-white transition-colors">
-              <GraduationCap className="text-[var(--color-shayak-rust)] group-hover:text-white" size={24} />
+            <div className="bg-[var(--color-sahayak-rust-light)] p-3 rounded-xl group-hover:bg-[var(--color-sahayak-rust)] group-hover:text-white transition-colors">
+              <GraduationCap className="text-[var(--color-sahayak-rust)] group-hover:text-white" size={24} />
             </div>
             <p className="text-sm text-gray-500 font-semibold uppercase tracking-wide">Completed Profiles</p>
           </div>
-          <h2 className="text-4xl font-bold text-[var(--color-shayak-sidebar)]">{summary.completedProfiles}</h2>
+          <h2 className="text-4xl font-bold text-[var(--color-sahayak-sidebar)]">{summary.completedProfiles}</h2>
         </div>
         
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:-translate-y-1 transition-transform cursor-pointer group">
@@ -102,7 +102,7 @@ export default function Dashboard() {
             </div>
             <p className="text-sm text-gray-500 font-semibold uppercase tracking-wide">Districts Reached</p>
           </div>
-          <h2 className="text-4xl font-bold text-[var(--color-shayak-sidebar)]">{districtData.length}</h2>
+          <h2 className="text-4xl font-bold text-[var(--color-sahayak-sidebar)]">{districtData.length}</h2>
         </div>
       </div>
 
@@ -111,7 +111,7 @@ export default function Dashboard() {
         
         {/* District Chart */}
         <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="font-serif text-xl font-bold text-[var(--color-shayak-sidebar)] mb-6">Beneficiaries by District</h3>
+          <h3 className="font-serif text-xl font-bold text-[var(--color-sahayak-sidebar)] mb-6">Beneficiaries by District</h3>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={districtData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -128,7 +128,7 @@ export default function Dashboard() {
                     fontWeight: 500
                   }}
                 />
-                <Bar dataKey="count" fill="var(--color-shayak-sidebar)" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="count" fill="var(--color-sahayak-sidebar)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -136,7 +136,7 @@ export default function Dashboard() {
 
         {/* Education Chart */}
         <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="font-serif text-xl font-bold text-[var(--color-shayak-sidebar)] mb-6">Education Distribution</h3>
+          <h3 className="font-serif text-xl font-bold text-[var(--color-sahayak-sidebar)] mb-6">Education Distribution</h3>
           <div className="h-72 flex justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>

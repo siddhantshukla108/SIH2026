@@ -29,16 +29,16 @@ export default function Login() {
       
       {/* Branding inside login since it might be standalone or in layout */}
       <div className="mb-8 flex flex-col items-center">
-        <div className="w-16 h-16 rounded-full bg-[var(--color-shayak-yellow)] flex items-center justify-center text-[var(--color-shayak-sidebar)] font-bold text-3xl shadow-lg mb-4">
+        <div className="w-16 h-16 rounded-full bg-[var(--color-sahayak-yellow)] flex items-center justify-center text-[var(--color-sahayak-sidebar)] font-bold text-3xl shadow-lg mb-4">
           श
         </div>
-        <h1 className="font-serif text-3xl font-bold text-[var(--color-shayak-sidebar)] tracking-tight">shayak</h1>
+        <h1 className="font-serif text-3xl font-bold text-[var(--color-sahayak-sidebar)] tracking-tight">sahayak</h1>
       </div>
 
       <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 p-8 max-w-sm w-full animate-slide-up">
         <div className="text-center mb-8">
-          <ShieldCheck size={40} className="mx-auto text-[var(--color-shayak-rust)] mb-4" />
-          <h2 className="text-xl font-bold text-[var(--color-shayak-sidebar)]">Officer Login</h2>
+          <ShieldCheck size={40} className="mx-auto text-[var(--color-sahayak-rust)] mb-4" />
+          <h2 className="text-xl font-bold text-[var(--color-sahayak-sidebar)]">Officer Login</h2>
           <p className="text-gray-500 font-medium text-sm mt-1">PM-AJAY Livelihood Mapping</p>
         </div>
         
@@ -51,7 +51,7 @@ export default function Login() {
               type="text" 
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[var(--color-shayak-rust)] focus:ring-2 focus:ring-[var(--color-shayak-rust-light)] transition-all font-medium text-gray-700"
+              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[var(--color-sahayak-rust)] focus:ring-2 focus:ring-[var(--color-sahayak-rust-light)] transition-all font-medium text-gray-700"
               required 
             />
           </div>
@@ -61,13 +61,13 @@ export default function Login() {
               type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[var(--color-shayak-rust)] focus:ring-2 focus:ring-[var(--color-shayak-rust-light)] transition-all font-medium text-gray-700"
+              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[var(--color-sahayak-rust)] focus:ring-2 focus:ring-[var(--color-sahayak-rust-light)] transition-all font-medium text-gray-700"
               required 
             />
           </div>
           <button 
             type="submit" 
-            className="w-full bg-[var(--color-shayak-sidebar)] hover:bg-[var(--color-shayak-sidebar-hover)] text-white rounded-xl py-3 font-semibold transition-colors mt-2"
+            className="w-full bg-[var(--color-sahayak-sidebar)] hover:bg-[var(--color-sahayak-sidebar-hover)] text-white rounded-xl py-3 font-semibold transition-colors mt-2"
           >
             Login
           </button>

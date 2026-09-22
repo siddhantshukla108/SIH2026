@@ -7,7 +7,7 @@ const API_BASE = `${BACKEND_URL}/api`;
 
 export default function VoiceDemo() {
   // Read saved language from localStorage, default to 'Hindi'
-  const savedLang = localStorage.getItem('shayak_language') || 'Hindi';
+  const savedLang = localStorage.getItem('sahayak_language') || 'Hindi';
   
   const [sessionId, setSessionId] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -127,14 +127,14 @@ export default function VoiceDemo() {
 
   const restartChat = () => {
     // Save current language and reload the page for a fully clean session
-    localStorage.setItem('shayak_language', selectedLanguage);
+    localStorage.setItem('sahayak_language', selectedLanguage);
     window.location.reload();
   };
 
   const handleLanguageChange = (lang) => {
     if (lang === selectedLanguage) return;
     // Save new language to localStorage and reload the page
-    localStorage.setItem('shayak_language', lang);
+    localStorage.setItem('sahayak_language', lang);
     window.location.reload();
   };
 
@@ -160,7 +160,7 @@ export default function VoiceDemo() {
       {/* Top status bar */}
       <div className="flex justify-between items-center px-4 sm:px-8 lg:px-12 py-3 shrink-0">
         <div className="flex items-center gap-1 sm:gap-2 text-gray-500 font-medium text-[10px] sm:text-xs">
-          <ShieldCheck size={14} className="text-[var(--color-shayak-rust)]" />
+          <ShieldCheck size={14} className="text-[var(--color-sahayak-rust)]" />
           A trusted guide for your next step
         </div>
         
@@ -170,7 +170,7 @@ export default function VoiceDemo() {
             <button 
               key={lang}
               onClick={() => handleLanguageChange(lang)}
-              className={`px-2 py-1 sm:px-3.5 sm:py-1.5 rounded-full transition-all duration-200 ${selectedLanguage === lang ? 'bg-white shadow-sm text-[var(--color-shayak-sidebar)] font-bold' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}
+              className={`px-2 py-1 sm:px-3.5 sm:py-1.5 rounded-full transition-all duration-200 ${selectedLanguage === lang ? 'bg-white shadow-sm text-[var(--color-sahayak-sidebar)] font-bold' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}
             >
               {lang}
             </button>
@@ -185,17 +185,17 @@ export default function VoiceDemo() {
         <div className={`lg:w-1/2 w-full text-center lg:text-left z-10 transition-all duration-500 ease-in-out ${isChatExpanded ? 'opacity-0 scale-95 hidden' : 'opacity-100 scale-100 block'}`}>
           
           {/* Badge – w-fit keeps it compact */}
-          <div className="w-fit inline-flex items-center gap-2 bg-[var(--color-shayak-rust-light)] text-[var(--color-shayak-rust)] px-4 py-1.5 rounded-full font-bold text-[10px] tracking-[0.15em] mb-5 mx-auto lg:mx-0">
+          <div className="w-fit inline-flex items-center gap-2 bg-[var(--color-sahayak-rust-light)] text-[var(--color-sahayak-rust)] px-4 py-1.5 rounded-full font-bold text-[10px] tracking-[0.15em] mb-5 mx-auto lg:mx-0">
             <Sparkles size={12} /> MADE FOR THE JOURNEY AHEAD
           </div>
           
           {/* Main heading */}
-          <h1 className="font-serif text-4xl md:text-[2.6rem] lg:text-[2.8rem] xl:text-[3.5rem] font-black leading-[1.08] mb-5 text-[var(--color-shayak-sidebar)]">
+          <h1 className="font-serif text-4xl md:text-[2.6rem] lg:text-[2.8rem] xl:text-[3.5rem] font-black leading-[1.08] mb-5 text-[var(--color-sahayak-sidebar)]">
             A clearer path to{' '}
             <br className="hidden lg:block"/>
-            <span className="text-[var(--color-shayak-rust)] relative inline-block">
+            <span className="text-[var(--color-sahayak-rust)] relative inline-block">
               work
-              <svg className="absolute -bottom-1 left-0 w-full h-2.5 text-[var(--color-shayak-yellow)] opacity-50" viewBox="0 0 100 20" preserveAspectRatio="none">
+              <svg className="absolute -bottom-1 left-0 w-full h-2.5 text-[var(--color-sahayak-yellow)] opacity-50" viewBox="0 0 100 20" preserveAspectRatio="none">
                 <path d="M0,12 Q50,0 100,12" stroke="currentColor" strokeWidth="6" fill="none" />
               </svg>
             </span>{' '}starts with a{' '}
@@ -205,21 +205,21 @@ export default function VoiceDemo() {
           
           {/* Subtext */}
           <p className="text-gray-500 text-sm lg:text-[15px] max-w-[420px] mx-auto lg:mx-0 mb-7 leading-relaxed">
-            Shayak listens to what you know, what you enjoy, and where you want to go. Then it finds training and livelihood options that fit your life.
+            Sahayak listens to what you know, what you enjoy, and where you want to go. Then it finds training and livelihood options that fit your life.
           </p>
           
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center gap-3 mx-auto lg:mx-0">
             <button 
               onClick={restartChat}
-              className="bg-[var(--color-shayak-sidebar)] hover:bg-[var(--color-shayak-sidebar-hover)] text-white pl-6 pr-5 py-3 rounded-xl font-semibold flex items-center gap-3 text-sm transition-all hover:shadow-xl hover:-translate-y-0.5 group"
+              className="bg-[var(--color-sahayak-sidebar)] hover:bg-[var(--color-sahayak-sidebar-hover)] text-white pl-6 pr-5 py-3 rounded-xl font-semibold flex items-center gap-3 text-sm transition-all hover:shadow-xl hover:-translate-y-0.5 group"
             >
               Start with your voice 
               <span className="bg-white/15 p-1.5 rounded-lg group-hover:bg-white/25 transition-colors">
                 <Mic size={14} />
               </span>
             </button>
-            <button className="bg-white hover:bg-gray-50 text-[var(--color-shayak-sidebar)] border border-gray-200 pl-6 pr-5 py-3 rounded-xl font-semibold flex items-center gap-3 text-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5">
+            <button className="bg-white hover:bg-gray-50 text-[var(--color-sahayak-sidebar)] border border-gray-200 pl-6 pr-5 py-3 rounded-xl font-semibold flex items-center gap-3 text-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5">
               Talk to shahayak
               <BookOpen size={15} />
             </button>
@@ -248,11 +248,11 @@ export default function VoiceDemo() {
             {/* Header */}
             <div className="px-5 py-3.5 flex items-center justify-between border-b border-gray-100 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--color-shayak-yellow)] to-amber-400 flex items-center justify-center text-white shadow-sm">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--color-sahayak-yellow)] to-amber-400 flex items-center justify-center text-white shadow-sm">
                   <MessageSquare size={17} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm text-[var(--color-shayak-sidebar)]">Shayak</h3>
+                  <h3 className="font-bold text-sm text-[var(--color-sahayak-sidebar)]">Sahayak</h3>
                   <p className="text-[11px] text-gray-400 font-medium">Your guide</p>
                 </div>
               </div>
@@ -291,8 +291,8 @@ export default function VoiceDemo() {
                 <div key={idx} className={`flex ${turn.role === 'user' ? 'justify-end' : 'justify-start'} animate-message`}>
                   <div className={`max-w-[85%] px-4 py-2.5 ${
                     turn.role === 'user' 
-                      ? 'bg-[var(--color-shayak-darkblue)] text-white rounded-2xl rounded-tr-sm shadow-sm' 
-                      : 'bg-[var(--color-shayak-beige)] text-[var(--color-shayak-sidebar)] rounded-2xl rounded-tl-sm'
+                      ? 'bg-[var(--color-sahayak-darkblue)] text-white rounded-2xl rounded-tr-sm shadow-sm' 
+                      : 'bg-[var(--color-sahayak-beige)] text-[var(--color-sahayak-sidebar)] rounded-2xl rounded-tl-sm'
                   }`}>
                     <p className="text-[13px] font-medium leading-relaxed">
                       {turn.text}
@@ -303,7 +303,7 @@ export default function VoiceDemo() {
               
               {isLoading && (
                 <div className="flex justify-start animate-message">
-                  <div className="bg-[var(--color-shayak-beige)] rounded-2xl rounded-tl-sm px-4 py-2.5 flex items-center gap-2">
+                  <div className="bg-[var(--color-sahayak-beige)] rounded-2xl rounded-tl-sm px-4 py-2.5 flex items-center gap-2">
                     <Loader2 className="animate-spin text-gray-400" size={14} />
                     <span className="text-gray-500 text-xs font-medium">Thinking...</span>
                   </div>
@@ -315,21 +315,21 @@ export default function VoiceDemo() {
             {/* Floating side badge */}
             {turns.length > 2 && (
               <div className="absolute -left-5 top-[42%] bg-white px-3 py-2 rounded-xl shadow-lg border border-gray-100 flex items-center gap-2 text-[10px] font-semibold text-gray-600 animate-slide-up z-20 hidden xl:flex">
-                <Sparkles size={12} className="text-[var(--color-shayak-rust)]" />
+                <Sparkles size={12} className="text-[var(--color-sahayak-rust)]" />
                 That helps me understand your path.
               </div>
             )}
 
             {/* "Tap to speak" Input Bar */}
             <div className="px-4 pb-4 pt-2 bg-white shrink-0">
-              <div className="bg-[var(--color-shayak-beige)] rounded-2xl py-2 pl-4 pr-2 flex items-center justify-between">
+              <div className="bg-[var(--color-sahayak-beige)] rounded-2xl py-2 pl-4 pr-2 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`flex gap-[3px] items-end ${isRecording ? 'opacity-100' : 'opacity-30'}`}>
-                    <div className="w-[3px] h-3 bg-[var(--color-shayak-rust)] rounded-full animate-bounce" style={{animationDelay: '0s'}}></div>
-                    <div className="w-[3px] h-4 bg-[var(--color-shayak-rust)] rounded-full animate-bounce" style={{animationDelay: '0.15s'}}></div>
-                    <div className="w-[3px] h-3 bg-[var(--color-shayak-rust)] rounded-full animate-bounce" style={{animationDelay: '0.3s'}}></div>
+                    <div className="w-[3px] h-3 bg-[var(--color-sahayak-rust)] rounded-full animate-bounce" style={{animationDelay: '0s'}}></div>
+                    <div className="w-[3px] h-4 bg-[var(--color-sahayak-rust)] rounded-full animate-bounce" style={{animationDelay: '0.15s'}}></div>
+                    <div className="w-[3px] h-3 bg-[var(--color-sahayak-rust)] rounded-full animate-bounce" style={{animationDelay: '0.3s'}}></div>
                   </div>
-                  <span className="text-[var(--color-shayak-sidebar)] font-semibold text-[13px]">
+                  <span className="text-[var(--color-sahayak-sidebar)] font-semibold text-[13px]">
                     {isRecording ? 'Listening...' : 'Tap to speak'}
                   </span>
                 </div>
@@ -340,7 +340,7 @@ export default function VoiceDemo() {
                   className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
                     isRecording 
                       ? 'bg-rose-500 text-white shadow-lg shadow-rose-300 scale-105' 
-                      : 'bg-[var(--color-shayak-rust)] text-white shadow-md shadow-[var(--color-shayak-rust-light)] hover:scale-110 hover:shadow-lg'
+                      : 'bg-[var(--color-sahayak-rust)] text-white shadow-md shadow-[var(--color-sahayak-rust-light)] hover:scale-110 hover:shadow-lg'
                   } disabled:opacity-50`}
                 >
                   {isRecording ? <Square size={14} fill="currentColor" /> : <Mic size={16} />}
@@ -355,7 +355,7 @@ export default function VoiceDemo() {
               <CheckCircle2 size={13} />
             </div>
             <div>
-              <p className="text-[11px] font-bold text-[var(--color-shayak-sidebar)] leading-tight">A plan that fits</p>
+              <p className="text-[11px] font-bold text-[var(--color-sahayak-sidebar)] leading-tight">A plan that fits</p>
               <p className="text-[9px] text-gray-400 font-medium">Built around your life</p>
             </div>
           </div>

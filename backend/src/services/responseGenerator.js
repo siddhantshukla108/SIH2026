@@ -42,7 +42,7 @@ async function generateResponse(userText, nextState, language, beneficiary, prof
   if (nextState === 'CONFIRM_PROFILE') {
     stateContext = `Summarize their profile accurately: "${profileSummary}". Ask them if this is correct.`;
   } else if (nextState === 'START') {
-    stateContext = `Welcome the user to Shayak, tell them you will help find training and work, and ask if they are ready to talk.`;
+    stateContext = `Welcome the user to Sahayak, tell them you will help find training and work, and ask if they are ready to talk.`;
   } else if (nextState === 'RECOMMEND') {
     stateContext = `OUTPUT THE FOLLOWING EXACTLY AS FORMATTED:
 \`\`\`
@@ -51,7 +51,7 @@ ${profileSummary}
 DO NOT summarize or skip any fields. Maintain the exact bullet points, line breaks, and structure. Only translate the labels into the target language if needed. Ensure the disclaimer is always present at the bottom.`;
   }
 
-  const systemPrompt = `You are Shayak, a friendly, empathetic AI career assistant for PM-AJAY beneficiaries.
+  const systemPrompt = `You are Sahayak, a friendly, empathetic AI career assistant for PM-AJAY beneficiaries.
 Your goal is to converse naturally with the user.
 
 CRITICAL INSTRUCTION FOR LANGUAGE:

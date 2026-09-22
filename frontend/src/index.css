@@ -2,14 +2,14 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-shayak-bg: #fcfbf7;
-  --color-shayak-sidebar: #1a1c29;
-  --color-shayak-sidebar-hover: #2a2c3d;
-  --color-shayak-rust: #d35b40;
-  --color-shayak-rust-light: #fbe6dd;
-  --color-shayak-yellow: #f8c058;
-  --color-shayak-beige: #eae6df;
-  --color-shayak-darkblue: #212338;
+  --color-sahayak-bg: #fcfbf7;
+  --color-sahayak-sidebar: #1a1c29;
+  --color-sahayak-sidebar-hover: #2a2c3d;
+  --color-sahayak-rust: #d35b40;
+  --color-sahayak-rust-light: #fbe6dd;
+  --color-sahayak-yellow: #f8c058;
+  --color-sahayak-beige: #eae6df;
+  --color-sahayak-darkblue: #212338;
   --font-sans: 'Inter', -apple-system, sans-serif;
   --font-serif: 'Playfair Display', serif;
 }
@@ -22,7 +22,7 @@
 
 body {
   margin: 0;
-  background-color: var(--color-shayak-bg);
+  background-color: var(--color-sahayak-bg);
   color: #1a1c29;
 }
 
