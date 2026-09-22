@@ -9,7 +9,8 @@
     "extract:qfiles": "node src/scripts/extractQFiles.js",
     "extract:plp": "node src/scripts/extractPlp.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "chat-cli": "node src/scripts/chatCli.js"
+    "chat-cli": "node src/scripts/chatCli.js",
+    "benchmark:audio": "node src/scripts/benchmarkAudio.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +22,7 @@
     "dotenv": "^18.0.1",
     "express": "^5.2.1",
     "form-data": "^4.0.6",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.10.1",
     "multer": "^2.4.0",
     "pdf-parse": "^2.4.5",

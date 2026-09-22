@@ -395,7 +395,8 @@ function isPositiveResponse(text) {
   const positives = [
     'haan', 'ha', 'haa', 'ji', 'ji haan', 'yes', 'ok', 'okay',
     'theek', 'thik', 'theek hai', 'sahi', 'sahi hai', 'bilkul',
-    'zaroor', 'han', 'hmm', 'ho', 'achha',
+    'zaroor', 'han', 'hmm', 'ho', 'achha', 'yup', 'yeah', 'y',
+    'हाँ', 'हा', 'जी', 'ठीक', 'सही', 'बिलकुल', 'ज़रूर', 'अच्छा'
   ];
   return positives.some(p => lower.includes(p));
 }

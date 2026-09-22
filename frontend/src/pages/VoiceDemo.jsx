@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { Mic, Square, Loader2, Volume2, Maximize } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Mic, Square, Loader2, Volume2, Maximize, RotateCcw, Send, CheckCircle2, Sparkles, AlertTriangle, Lock } from 'lucide-react';
 import RecommendationCard from '../components/RecommendationCard';
+import ThemeToggle from '../components/ThemeToggle';
 
 const API_BASE = 'http://localhost:5000/api';
 
@@ -13,28 +15,28 @@ export default function VoiceDemo() {
   const [recommendations, setRecommendations] = useState([]);
   const [kioskMode, setKioskMode] = useState(false);
   const [error, setError] = useState(null);
+  const [textInput, setTextInput] = useState('');
   
   const mediaRecorder = useRef(null);
   const audioChunks = useRef([]);
   const chatEndRef = useRef(null);
   const audioPlayer = useRef(new Audio());
 
-  useEffect(() => {
-    // Check for kiosk mode in URL
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('kiosk') === '1') {
-      setKioskMode(true);
-    }
+  const hasInitialized = useRef(false);
 
-    // Initial greeting on load
-    sendTextMessage('start');
-    
-    return () => {
-      audioPlayer.current.pause();
-    };
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('kiosk') === '1') setKioskMode(true);
+    return () => audioPlayer.current.pause();
   }, []);
 
-  // Auto scroll to bottom of chat
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      sendTextMessage('start');
+    }
+  }, []);
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [turns, recommendations]);
@@ -43,18 +45,21 @@ export default function VoiceDemo() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await axios.post(`${API_BASE}/chat/message`, {
-        sessionId,
-        text,
-        language: 'hi'
-      });
+      const res = await axios.post(`${API_BASE}/chat/message`, { sessionId, text, language: 'auto' });
+      if (text !== 'start') setTurns(prev => [...prev, { role: 'user', text }]);
       handleBotResponse(res.data);
     } catch (err) {
       console.error(err);
-      setError('Connection error. Please try again.');
+      setError('Network error. Please try again.');
     } finally {
       setIsLoading(false);
+      setTextInput('');
     }
+  };
+
+  const handleTextSubmit = (e) => {
+    e.preventDefault();
+    if (textInput.trim()) sendTextMessage(textInput);
   };
 
   const startRecording = async () => {
@@ -63,29 +68,22 @@ export default function VoiceDemo() {
       mediaRecorder.current = new MediaRecorder(stream);
       audioChunks.current = [];
 
-      mediaRecorder.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunks.current.push(event.data);
-        }
+      mediaRecorder.current.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunks.current.push(e.data);
       };
 
       mediaRecorder.current.onstop = async () => {
         const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
         await sendAudioMessage(audioBlob);
-        
-        // Stop all tracks to release mic
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach(track => track.stop()); // cleanup
       };
 
       mediaRecorder.current.start();
       setIsRecording(true);
       setError(null);
-      
-      // Stop previous audio if playing
       audioPlayer.current.pause();
     } catch (err) {
-      console.error('Error accessing microphone:', err);
-      setError('Microphone permission denied or not available.');
+      setError('Microphone permission denied.');
     }
   };
 
@@ -100,24 +98,16 @@ export default function VoiceDemo() {
     setIsLoading(true);
     const formData = new FormData();
     formData.append('audio', audioBlob, 'recording.webm');
-    if (sessionId) {
-      formData.append('sessionId', sessionId);
-    }
-    formData.append('language', 'hi');
+    if (sessionId) formData.append('sessionId', sessionId);
+    formData.append('language', 'auto');
 
     try {
       const res = await axios.post(`${API_BASE}/chat/message`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      
-      // Add user's transcribed text to chat
-      if (res.data.userText) {
-        setTurns(prev => [...prev, { role: 'user', text: res.data.userText }]);
-      }
-      
+      if (res.data.userText) setTurns(prev => [...prev, { role: 'user', text: res.data.userText }]);
       handleBotResponse(res.data);
     } catch (err) {
-      console.error(err);
       setError('Failed to process audio. Please try again.');
     } finally {
       setIsLoading(false);
@@ -125,95 +115,100 @@ export default function VoiceDemo() {
   };
 
   const handleBotResponse = (data) => {
-    if (!sessionId && data.sessionId) {
-      setSessionId(data.sessionId);
-    }
-    
-    // Don't duplicate user text if it was a text message (we handle that differently), 
-    // but we already handled the audio transcription above.
-    
-    // Add bot text
-    if (data.botText) {
-      setTurns(prev => [...prev, { role: 'bot', text: data.botText }]);
-    }
-    
-    if (data.recommendations && data.recommendations.length > 0) {
-      setRecommendations(data.recommendations);
-    }
+    if (!sessionId && data.sessionId) setSessionId(data.sessionId);
+    if (data.botText) setTurns(prev => [...prev, { role: 'bot', text: data.botText }]);
+    if (data.recommendations?.length > 0) setRecommendations(data.recommendations);
 
-    // Handle TTS
     if (data.botAudioUrl) {
       audioPlayer.current.src = `http://localhost:5000${data.botAudioUrl}`;
       audioPlayer.current.play().catch(e => console.log('Autoplay blocked:', e));
     } else if (data.botText) {
-      // Fallback to browser TTS if backend didn't provide audio
       fallbackBrowserTTS(data.botText);
     }
   };
 
   const fallbackBrowserTTS = (text) => {
-    // Only use browser TTS if speech synthesis is available
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // Stop any ongoing speech
+      window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'hi-IN'; // Set to Hindi
-      utterance.rate = 0.9; // Slightly slower for clarity
-      
-      // Try to find a Google Hindi voice if available, else use default
+      utterance.lang = 'hi-IN'; // Default to Hindi fallback
+      utterance.rate = 0.9;
       const voices = window.speechSynthesis.getVoices();
-      const hiVoice = voices.find(v => v.lang.includes('hi') || v.lang.includes('hi-IN'));
-      if (hiVoice) utterance.voice = hiVoice;
-      
+      const prefVoice = voices.find(v => v.lang.includes('hi'));
+      if (prefVoice) utterance.voice = prefVoice;
       window.speechSynthesis.speak(utterance);
     }
   };
 
-  const enterFullScreen = () => {
-    if (document.documentElement.requestFullscreen) {
-      document.documentElement.requestFullscreen().catch(e => console.log(e));
-    }
+  const handleStartOver = () => {
+    setSessionId(null);
+    setTurns([]);
+    setRecommendations([]);
+    setError(null);
+    audioPlayer.current.pause();
+    sendTextMessage('start'); // Auto-restart
   };
 
+  // Screen: Chat Interface
   return (
-    <div className={`min-h-screen bg-slate-50 flex flex-col ${kioskMode ? 'fixed inset-0 overflow-hidden' : ''}`}>
+    <div className={`min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 flex flex-col font-['Outfit'] ${kioskMode ? 'fixed inset-0 overflow-hidden' : ''}`}>
       
-      {/* Header */}
-      <header className="bg-indigo-600 text-white p-4 shadow-md flex justify-between items-center z-10">
-        <div>
-          <h1 className="text-xl font-bold">PM-AJAY Sahayak</h1>
-          <p className="text-indigo-200 text-xs mt-1">Aapki awaaz, aapka vikas</p>
+      {/* Header (Glassmorphism) */}
+      <header className="glass sticky top-0 z-20 px-4 md:px-6 py-3 md:py-4 shadow-sm flex justify-between items-center border-b border-slate-200/50 dark:border-slate-700/50">
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className="bg-indigo-600 p-1.5 md:p-2 rounded-xl shadow-md">
+            <Sparkles size={20} className="text-white hidden md:block" />
+            <Sparkles size={16} className="text-white md:hidden" />
+          </div>
+          <div>
+            <h1 className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">PM-AJAY Sahayak</h1>
+            <p className="text-indigo-600 dark:text-indigo-400 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Aapki awaaz, aapka vikas</p>
+          </div>
         </div>
-        {kioskMode && (
-          <button onClick={enterFullScreen} className="p-2 bg-indigo-700 rounded-full hover:bg-indigo-800 transition">
-            <Maximize size={20} />
+        <div className="flex gap-2 md:gap-3 items-center">
+          <ThemeToggle />
+          {!kioskMode && (
+            <Link to="/login" className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-indigo-700 transition text-sm font-semibold shadow-sm border border-slate-200 dark:border-slate-700 mr-1 md:mr-2" title="Officer Login">
+              <Lock size={14} /> Admin
+            </Link>
+          )}
+          <button onClick={handleStartOver} className="p-2 md:p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-indigo-600 transition shadow-sm" title="Start Over">
+            <RotateCcw size={18} className="md:w-5 md:h-5" />
           </button>
-        )}
+          {kioskMode && (
+            <button onClick={() => document.documentElement.requestFullscreen()} className="p-2 md:p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-indigo-600 transition shadow-sm" title="Fullscreen">
+              <Maximize size={18} className="md:w-5 md:h-5" />
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-red-100 text-red-700 p-3 text-center text-sm font-medium">
-          {error}
+        <div className="bg-red-50 text-red-600 p-3 flex justify-center items-center gap-2 text-sm font-medium border-b border-red-100 animate-slide-up">
+          <AlertTriangle size={16} /> {error}
         </div>
       )}
 
       {/* Chat History */}
-      <main className="flex-1 overflow-y-auto p-4 space-y-6 pb-40">
+      <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 pb-52">
         {turns.length === 0 && !isLoading && (
-          <div className="text-center text-slate-400 mt-20">
-            <Volume2 size={48} className="mx-auto mb-4 opacity-50" />
-            <p>Awaaz se baat karne ke liye mic dabayein...</p>
+          <div className="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500 mt-20 animate-slide-up">
+            <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800/50 rounded-full flex items-center justify-center mb-6">
+              <Volume2 size={48} className="text-slate-300 dark:text-slate-600" />
+            </div>
+            <p className="text-lg font-medium">Awaaz se baat karne ke liye niche mic dabayein</p>
           </div>
         )}
         
         {turns.map((turn, idx) => (
-          <div key={idx} className={`flex ${turn.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] rounded-2xl p-4 shadow-sm ${
+          <div key={idx} className={`flex ${turn.role === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up`} style={{animationDelay: '0.1s'}}>
+            <div className={`max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-sm ${
               turn.role === 'user' 
-                ? 'bg-indigo-600 text-white rounded-tr-sm' 
-                : 'bg-white text-slate-800 border border-slate-100 rounded-tl-sm'
+                ? 'bg-indigo-600 text-white rounded-tr-sm bg-gradient-to-br from-indigo-500 to-indigo-600' 
+                : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-100 dark:border-slate-700 rounded-tl-sm'
             }`}>
-              <p className="text-[15px] leading-relaxed font-medium">
+              <p className="text-[16px] leading-relaxed font-medium">
                 {turn.text}
               </p>
             </div>
@@ -222,21 +217,21 @@ export default function VoiceDemo() {
         
         {/* Loading Indicator */}
         {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-white border border-slate-100 rounded-2xl p-4 rounded-tl-sm shadow-sm flex items-center gap-3">
-              <Loader2 className="animate-spin text-indigo-500" size={20} />
-              <span className="text-slate-500 text-sm font-medium animate-pulse">Soch raha hoon...</span>
+          <div className="flex justify-start animate-slide-up">
+            <div className="glass border border-slate-200 dark:border-slate-700 rounded-2xl p-4 rounded-tl-sm shadow-sm flex items-center gap-3">
+              <Loader2 className="animate-spin text-indigo-600 dark:text-indigo-400" size={20} />
+              <span className="text-slate-600 dark:text-slate-300 text-sm font-semibold">Soch raha hoon...</span>
             </div>
           </div>
         )}
 
         {/* Recommendations Section */}
         {recommendations.length > 0 && (
-          <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h2 className="text-lg font-bold text-slate-800 mb-4 px-2 flex items-center gap-2">
-              <CheckCircle2 className="text-emerald-500" />
-              Aapke liye sujhav:
-            </h2>
+          <div className="mt-8 animate-slide-up">
+            <div className="flex items-center gap-2 mb-6 px-2">
+              <div className="bg-emerald-100 dark:bg-emerald-900/30 p-1.5 rounded-full"><CheckCircle2 size={20} className="text-emerald-600 dark:text-emerald-400" /></div>
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Aapke liye sujhav</h2>
+            </div>
             <div className="space-y-4">
               {recommendations.map((rec, idx) => (
                 <RecommendationCard key={idx} recommendation={rec} />
@@ -247,34 +242,49 @@ export default function VoiceDemo() {
         <div ref={chatEndRef} />
       </main>
 
-      {/* Voice Controls (Fixed at bottom) */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent pt-12 pointer-events-none">
-        <div className="max-w-md mx-auto flex justify-center pointer-events-auto relative">
-          
-          {/* Ripple Effect when recording */}
-          {isRecording && (
-            <div className="absolute inset-0 bg-red-500/20 rounded-full animate-ping scale-150"></div>
-          )}
+      {/* Controls Footer */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white dark:from-slate-900 dark:via-slate-900 to-transparent pt-16 pointer-events-none z-20">
+        
+        <div className="max-w-md mx-auto flex justify-center pointer-events-auto relative mb-2 md:mb-4">
+          {/* Animated pulsing ring when recording */}
+          {isRecording && <div className="absolute inset-0 bg-indigo-500 rounded-full animate-pulse-ring z-0"></div>}
           
           <button
             onClick={isRecording ? stopRecording : startRecording}
             disabled={isLoading && !isRecording}
-            className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 ${
+            className={`relative z-10 w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${
               isRecording 
-                ? 'bg-red-500 hover:bg-red-600 scale-110 shadow-red-500/40' 
-                : 'bg-indigo-600 hover:bg-indigo-700 hover:scale-105 shadow-indigo-600/40'
-            } ${isLoading && !isRecording ? 'opacity-50 cursor-not-allowed' : ''}`}
+                ? 'bg-rose-500 text-white scale-110 shadow-rose-500/40' 
+                : 'bg-indigo-600 hover:bg-indigo-700 hover:scale-105 text-white shadow-indigo-600/30'
+            } disabled:opacity-50 disabled:hover:scale-100`}
           >
-            {isRecording ? (
-              <Square size={36} className="text-white fill-current" />
-            ) : (
-              <Mic size={40} className="text-white" />
-            )}
+            {isRecording ? <Square size={32} className="md:w-10 md:h-10" fill="currentColor" /> : <Mic size={36} className="md:w-12 md:h-12" />}
           </button>
         </div>
-        <p className="text-center mt-4 text-slate-500 text-sm font-medium pointer-events-auto">
-          {isRecording ? 'Bolne ke baad dabayein...' : 'Baat karne ke liye dabayein'}
-        </p>
+        
+        {/* Type instead box - Hidden in Kiosk Mode */}
+        {!kioskMode && (
+          <div className="max-w-md mx-auto pointer-events-auto bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden mt-6 mb-2 transition-all focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500">
+            <form onSubmit={handleTextSubmit} className="flex items-center">
+              <input 
+                type="text" 
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder="Type instead (for testing)..." 
+                className="flex-1 py-3 px-5 outline-none text-slate-700 dark:text-slate-200 font-medium bg-transparent"
+                disabled={isLoading || isRecording}
+              />
+              <button 
+                type="submit" 
+                disabled={!textInput.trim() || isLoading || isRecording}
+                className="p-3 mr-1 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-slate-700 rounded-xl disabled:opacity-30 transition-all"
+              >
+                <Send size={20} />
+              </button>
+            </form>
+          </div>
+        )}
+
       </div>
     </div>
   );

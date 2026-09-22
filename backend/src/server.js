@@ -16,6 +16,8 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 
 const courseRoutes = require('./routes/course.routes');
 const chatRoutes = require('./routes/chat.routes');
+const adminRoutes = require('./routes/admin.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
 
 // Health check route
 app.get('/api/health', (req, res) => {
@@ -25,6 +27,8 @@ app.get('/api/health', (req, res) => {
 // API Routes
 app.use('/api/courses', courseRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Database connection
 if (process.env.MONGODB_URI) {
@@ -37,4 +41,5 @@ if (process.env.MONGODB_URI) {
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log('Backend ready.');
 });
