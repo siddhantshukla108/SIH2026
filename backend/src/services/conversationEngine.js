@@ -344,11 +344,35 @@ async function generateRecommendations(beneficiary, msgs, language) {
     };
   }
 
-  const rawTextForLLM = `I found ${results.courses.length} courses and ${results.livelihoods.length} livelihoods.\n` +
-    `Courses: ${results.courses.map(r => r.title || r.refId).join(', ')}.\n` +
-    `Livelihoods: ${results.livelihoods.map(r => r.title || r.refId).join(', ')}.\n` +
-    `Disclaimer: These are just suggestions. Confirm with an officer.`;
+  let coursesText = results.courses.map((c, i) => 
+    `${i + 1}. ${c.title} (${c.titleHi || ''}) — NSQF Level ${c.nsqfLevel || 'N/A'}, Duration: ${c.durationHours || 'Unknown'} hours, Min education: ${c.minEducation || 'N/A'}\n` +
+    `   Job roles: ${(c.jobRoles || []).join(', ') || 'N/A'}\n` +
+    `   Reason: "${c.reason || ''}"\n` +
+    `   Skill gap: "${c.skillGap || ''}"\n` +
+    `   Next step: "${c.nextStep || ''}"`
+  ).join('\n\n');
 
+  let livelihoodsText = results.livelihoods.map((l, i) => 
+    `${i + 1}. ${l.title} (${l.titleHi || ''}) — Type: ${l.type === 'self-employment' ? 'Self-employment' : 'Wage employment'}\n` +
+    `   Required skills: ${(l.requiredSkills || []).join(', ') || 'N/A'}\n` +
+    `   Startup cost: ${l.startupCostRange || '₹10,000–₹50,000 (indicative)'}\n` +
+    `   Demand signal: ${l.demandSignal ? l.demandSignal.charAt(0).toUpperCase() + l.demandSignal.slice(1) : 'Unknown'}\n` +
+    `   Support note: "${l.supportNote || 'PM-AJAY ya bank loan ke options ke liye local officer se baat karein.'}"`
+  ).join('\n\n');
+
+  const rawTextForLLM = `Profile confirmation:
+"Aapka profile: ${buildHindiProfileSummary(beneficiary)}."
+
+Training recommendations:
+${coursesText || 'No training courses found.'}
+
+Livelihood recommendations:
+${livelihoodsText || 'No livelihood options found.'}
+
+Disclaimer (always shown at the end):
+"Yeh sujhav aapki profile ke aadhar par diye gaye hain. Training seat, job placement ya funding ki guarantee nahi hai — kripya training centre ya local officer se confirm karein."`;
+
+  // Tell the LLM to output exactly what we just formatted, translated/adjusted to the correct language
   const botText = await require('./responseGenerator').generateResponse('I want recommendations', 'RECOMMEND', language, profile, rawTextForLLM);
 
   // Format recommendations for storage

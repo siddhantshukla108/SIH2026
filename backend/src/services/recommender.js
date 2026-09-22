@@ -200,19 +200,27 @@ Pick the best matches and return JSON.`;
 }
 
 /**
- * Step 4: Validate that returned IDs exist in the candidate list
+ * Step 4: Validate that returned IDs exist in the candidate list and merge full DB data
  */
 function validateIds(recommendations, candidates) {
-  const validIds = new Set(candidates.map(c => c._id.toString()));
-  return recommendations.filter(rec => {
-    if (!rec.refId) return false;
+  const candidateMap = new Map(candidates.map(c => [c._id.toString(), c]));
+  const valid = [];
+  
+  for (const rec of recommendations) {
+    if (!rec.refId) continue;
     const id = rec.refId.toString();
-    if (!validIds.has(id)) {
+    const candidateDbObj = candidateMap.get(id);
+    if (!candidateDbObj) {
       console.warn(`[Recommender] Dropping invalid ID: ${id}`);
-      return false;
+      continue;
     }
-    return true;
-  });
+    // Merge the full DB object with the LLM reasoning fields
+    valid.push({
+      ...candidateDbObj,
+      ...rec,
+    });
+  }
+  return valid;
 }
 
 /**

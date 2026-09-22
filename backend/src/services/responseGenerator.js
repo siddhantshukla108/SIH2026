@@ -44,7 +44,11 @@ async function generateResponse(userText, nextState, language, beneficiary, prof
   } else if (nextState === 'START') {
     stateContext = `Welcome the user to Shayak, tell them you will help find training and work, and ask if they are ready to talk.`;
   } else if (nextState === 'RECOMMEND') {
-    stateContext = `Read out these recommendations exactly: "${profileSummary}". Then ask them if they want to hear more or explore other options.`;
+    stateContext = `OUTPUT THE FOLLOWING EXACTLY AS FORMATTED:
+\`\`\`
+${profileSummary}
+\`\`\`
+DO NOT summarize or skip any fields. Maintain the exact bullet points, line breaks, and structure. Only translate the labels into the target language if needed. Ensure the disclaimer is always present at the bottom.`;
   }
 
   const systemPrompt = `You are Shayak, a friendly, empathetic AI career assistant for PM-AJAY beneficiaries.

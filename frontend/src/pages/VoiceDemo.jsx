@@ -157,19 +157,19 @@ export default function VoiceDemo() {
     <div className="w-full h-full flex flex-col overflow-hidden">
       
       {/* Top status bar */}
-      <div className="flex justify-between items-center px-8 lg:px-12 py-3 shrink-0">
-        <div className="flex items-center gap-2 text-gray-500 font-medium text-xs">
-          <ShieldCheck size={15} className="text-[var(--color-shayak-rust)]" />
+      <div className="flex justify-between items-center px-4 sm:px-8 lg:px-12 py-3 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 text-gray-500 font-medium text-[10px] sm:text-xs">
+          <ShieldCheck size={14} className="text-[var(--color-shayak-rust)]" />
           A trusted guide for your next step
         </div>
         
         {/* Language Selector */}
-        <div className="hidden sm:flex items-center bg-gray-100 p-1 rounded-full text-xs font-medium border border-gray-200/60">
+        <div className="flex items-center bg-gray-100 p-0.5 sm:p-1 rounded-full text-[10px] sm:text-xs font-medium border border-gray-200/60">
           {['Hindi', 'English', 'Hinglish'].map(lang => (
             <button 
               key={lang}
               onClick={() => handleLanguageChange(lang)}
-              className={`px-3.5 py-1.5 rounded-full transition-all duration-200 ${selectedLanguage === lang ? 'bg-white shadow-sm text-[var(--color-shayak-sidebar)] font-bold' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}
+              className={`px-2 py-1 sm:px-3.5 sm:py-1.5 rounded-full transition-all duration-200 ${selectedLanguage === lang ? 'bg-white shadow-sm text-[var(--color-shayak-sidebar)] font-bold' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}
             >
               {lang}
             </button>
@@ -178,7 +178,7 @@ export default function VoiceDemo() {
       </div>
 
       {/* Main Content */}
-      <div className={`flex flex-col lg:flex-row items-center justify-between w-full mx-auto flex-1 px-8 lg:px-12 py-6 lg:py-0 transition-all duration-500 ease-in-out ${isChatExpanded ? 'max-w-7xl' : 'max-w-6xl'}`}>
+      <div className={`flex flex-col lg:flex-row items-center justify-between w-full mx-auto flex-1 px-4 sm:px-8 lg:px-12 py-6 lg:py-0 transition-all duration-500 ease-in-out ${isChatExpanded ? 'max-w-7xl' : 'max-w-6xl'}`}>
         
         {/* ───── Left: Text & CTA ───── */}
         <div className={`lg:w-1/2 w-full text-center lg:text-left z-10 transition-all duration-500 ease-in-out ${isChatExpanded ? 'opacity-0 scale-95 hidden' : 'opacity-100 scale-100 block'}`}>
@@ -189,7 +189,7 @@ export default function VoiceDemo() {
           </div>
           
           {/* Main heading */}
-          <h1 className="font-serif text-[2.6rem] lg:text-[2.8rem] xl:text-[3.5rem] font-black leading-[1.08] mb-5 text-[var(--color-shayak-sidebar)]">
+          <h1 className="font-serif text-4xl md:text-[2.6rem] lg:text-[2.8rem] xl:text-[3.5rem] font-black leading-[1.08] mb-5 text-[var(--color-shayak-sidebar)]">
             A clearer path to{' '}
             <br className="hidden lg:block"/>
             <span className="text-[var(--color-shayak-rust)] relative inline-block">
@@ -232,7 +232,7 @@ export default function VoiceDemo() {
         </div>
 
         {/* ───── Right: Chat Widget ───── */}
-        <div className={`relative flex items-center justify-center py-4 mb-6 lg:mb-0 transition-all duration-500 ease-in-out ${isChatExpanded ? 'w-full max-w-4xl mx-auto h-[75vh]' : 'lg:w-[45%] w-full max-w-[360px]'}`}>
+        <div className={`relative flex items-center justify-center py-4 mb-6 lg:mb-0 transition-all duration-500 ease-in-out ${isChatExpanded ? 'w-full max-w-4xl mx-auto h-[75vh]' : 'lg:w-[45%] w-full max-w-[400px]'}`}>
           
           {/* Decorative concentric rings */}
           {!isChatExpanded && (
@@ -242,7 +242,7 @@ export default function VoiceDemo() {
             </>
           )}
 
-          <div className={`bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] overflow-visible border border-gray-100/80 flex flex-col w-full relative z-10 transition-all duration-500 ${isChatExpanded ? 'h-full' : 'h-[400px]'}`}>
+          <div className={`bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] overflow-visible border border-gray-100/80 flex flex-col w-full relative z-10 transition-all duration-500 ${isChatExpanded ? 'h-full' : 'min-h-[400px] flex-1 lg:flex-none lg:h-[400px]'}`}>
             
             {/* Header */}
             <div className="px-5 py-3.5 flex items-center justify-between border-b border-gray-100 shrink-0">
