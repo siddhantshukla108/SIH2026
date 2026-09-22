@@ -3,7 +3,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = `${BACKEND_URL}/api`;
 
 export default function Login() {
   const [username, setUsername] = useState('');

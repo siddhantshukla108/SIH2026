@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { Mic, Square, Loader2, Sparkles, AlertTriangle, ShieldCheck, CheckCircle2, BookOpen, MessageSquare, Maximize2, Minimize2 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = `${BACKEND_URL}/api`;
 
 export default function VoiceDemo() {
   // Read saved language from localStorage, default to 'Hindi'
@@ -117,7 +118,7 @@ export default function VoiceDemo() {
     
     // Fallback to text synthesis if no audio URL is provided
     if (data.botAudioUrl) {
-      audioPlayer.current.src = `http://localhost:5000${data.botAudioUrl}`;
+      audioPlayer.current.src = `${BACKEND_URL}${data.botAudioUrl}`;
       audioPlayer.current.play().catch(e => console.log('Autoplay blocked:', e));
     } else if (data.botText) {
       fallbackBrowserTTS(data.botText);

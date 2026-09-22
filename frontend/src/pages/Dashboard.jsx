@@ -4,7 +4,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { LayoutDashboard, Users, GraduationCap, Map, LogOut, ChevronRight } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = `${BACKEND_URL}/api`;
 const COLORS = ['#d35b40', '#f8c058', '#1a1c29', '#2a2c3d', '#fbe6dd', '#eae6df'];
 
 export default function Dashboard() {
