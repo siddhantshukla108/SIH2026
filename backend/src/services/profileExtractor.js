@@ -59,10 +59,10 @@ async function extractProfile(userMessage, currentProfile = {}, conversationHist
  * Build the system prompt for profile extraction
  */
 function buildExtractionPrompt(currentProfile) {
-  return `You are a profile extraction assistant for a Hindi/Hinglish voice conversation system.
+  return `You are a profile extraction assistant for a Hindi/English voice conversation system.
 Your job is to extract structured profile fields from the user's message.
 
-The user is a beneficiary from an SC community in India. They speak Hindi or Hinglish or English.
+The user is a beneficiary from an SC community in India. They speak Hindi or English.
 Common terms: "dasvi pass" = 10th, "aathvi" = 8th, "silai" = tailoring, "dudh ka kaam" = dairy, "kheti" = farming, "gaon" = village.
 
 CRITICAL INSTRUCTION: You must act as a translator and taxonomy matcher. Regardless of how broken the user's language or spelling is (e.g. "I m intrestd in silai" or "main kheti krta hu"), you MUST map their skills, interests, and current work to EXACT standard English terms (e.g., "tailoring", "farming"). Do NOT output Hindi words in the JSON arrays; translate everything to proper English concepts.
@@ -100,7 +100,7 @@ Extract ALL fields you can find from the user's message. Return ONLY valid JSON 
 Rules:
 1. Only include fields you can actually extract from this message. Use null for unknown fields.
 2. Do NOT invent or guess information. If unsure, set confidence low and leave null.
-3. Map Hindi/Hinglish terms to English field values (e.g. "silai" → skill "tailoring").
+3. Map Hindi terms to English field values (e.g. "silai" → skill "tailoring").
 4. Education must be one of: none, 5th, 8th, 10th, 12th, graduate.
 5. workPreference must be: wage, self, or either.
 6. For missingFields, list fields that are still null in the combined profile (current + extracted).

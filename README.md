@@ -18,12 +18,12 @@
 ---
 
 ## 🌟 Vision
-In rural India, access to personalized career counseling is a luxury. **Sahayak** bridges this gap by acting as a 24/7 AI-powered counselor. It engages users in their native language (Hindi, Hinglish, or English) via a seamless voice-first interface, understands their background, and recommends NSQF-certified training programs and viable local livelihood options.
+In rural India, access to personalized career counseling is a luxury. **Sahayak** bridges this gap by acting as a 24/7 AI-powered counselor. It engages users in their native language (Hindi or English) via a seamless voice-first interface, understands their background, and recommends NSQF-certified training programs and viable local livelihood options.
 
 ## ✨ Key Features
 
 - 🎙️ **Voice-First AI Interface:** Eliminates the literacy barrier. Users talk to Sahayak just like a human counselor. No typing required.
-- 🗣️ **Multilingual & Context-Aware:** Fluent in Hindi, Hinglish, and English with a soft, empathetic, and culturally aware tone.
+- 🗣️ **Multilingual & Context-Aware:** Fluent in Hindi and English with a soft, empathetic, and culturally aware tone.
 - 🎯 **Smart Recommender Engine:** Maps user profiles to a curated dataset of NSQF-aligned courses and livelihood opportunities, outputting actionable next steps, required skills, and cost ranges.
 - 📱 **Mobile-Optimized:** A beautiful, responsive, rust-and-navy UI tailored for low-end mobile devices common in rural areas.
 - 📊 **Officer Dashboard:** A secure admin panel for officials to monitor conversations, track beneficiaries by district, and analyze demographic data in real-time.

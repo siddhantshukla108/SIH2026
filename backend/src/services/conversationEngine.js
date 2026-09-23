@@ -344,24 +344,37 @@ async function generateRecommendations(beneficiary, msgs, language) {
     };
   }
 
+  const isHi = language === 'hindi';
+
   let coursesText = results.courses.map((c, i) => 
-    `${i + 1}. ${c.title} (${c.titleHi || ''}) — NSQF Level ${c.nsqfLevel || 'N/A'}, Duration: ${c.durationHours || 'Unknown'} hours, Min education: ${c.minEducation || 'N/A'}\n` +
-    `   Job roles: ${(c.jobRoles || []).join(', ') || 'N/A'}\n` +
-    `   Reason: "${c.reason || ''}"\n` +
-    `   Skill gap: "${c.skillGap || ''}"\n` +
-    `   Next step: "${c.nextStep || ''}"`
+    `${i + 1}. ${isHi ? (c.titleHi || c.title) : c.title} — NSQF Level ${c.nsqfLevel || 'N/A'}, ${isHi ? 'समय' : 'Duration'}: ${c.durationHours || 'Unknown'} ${isHi ? 'घंटे' : 'hours'}, ${isHi ? 'कम से कम पढ़ाई' : 'Min education'}: ${c.minEducation || 'N/A'}\n` +
+    `   ${isHi ? 'काम' : 'Job roles'}: ${(c.jobRoles || []).join(', ') || 'N/A'}\n` +
+    `   ${isHi ? 'कारण' : 'Reason'}: "${c.reason || ''}"\n` +
+    `   ${isHi ? 'सीखने की जरूरत' : 'Skill gap'}: "${c.skillGap || ''}"\n` +
+    `   ${isHi ? 'अगला कदम' : 'Next step'}: "${c.nextStep || ''}"`
   ).join('\n\n');
 
   let livelihoodsText = results.livelihoods.map((l, i) => 
-    `${i + 1}. ${l.title} (${l.titleHi || ''}) — Type: ${l.type === 'self-employment' ? 'Self-employment' : 'Wage employment'}\n` +
-    `   Required skills: ${(l.requiredSkills || []).join(', ') || 'N/A'}\n` +
-    `   Startup cost: ${l.startupCostRange || '₹10,000–₹50,000 (indicative)'}\n` +
-    `   Demand signal: ${l.demandSignal ? l.demandSignal.charAt(0).toUpperCase() + l.demandSignal.slice(1) : 'Unknown'}\n` +
-    `   Support note: "${l.supportNote || 'PM-AJAY ya bank loan ke options ke liye local officer se baat karein.'}"`
+    `${i + 1}. ${isHi ? (l.titleHi || l.title) : l.title} — ${isHi ? 'प्रकार' : 'Type'}: ${l.type === 'self-employment' ? (isHi ? 'अपना व्यवसाय' : 'Self-employment') : (isHi ? 'नौकरी' : 'Wage employment')}\n` +
+    `   ${isHi ? 'जरूरी स्किल्स' : 'Required skills'}: ${(l.requiredSkills || []).join(', ') || 'N/A'}\n` +
+    `   ${isHi ? 'शुरुआती खर्च' : 'Startup cost'}: ${l.startupCostRange || '₹10,000–₹50,000 (indicative)'}\n` +
+    `   ${isHi ? 'मांग' : 'Demand signal'}: ${l.demandSignal ? l.demandSignal.charAt(0).toUpperCase() + l.demandSignal.slice(1) : 'Unknown'}\n` +
+    `   ${isHi ? 'मदद' : 'Support note'}: "${l.supportNote || (isHi ? 'PM-AJAY या बैंक लोन के विकल्पों के लिए स्थानीय अधिकारी से बात करें।' : 'Contact local officer for PM-AJAY or bank loan options.')}"`
   ).join('\n\n');
 
-  const rawTextForLLM = `Profile confirmation:
-"Your profile: ${buildProfileSummaryText(beneficiary)}."
+  const rawTextForLLM = isHi ? `प्रोफ़ाइल की पुष्टि:
+"आपकी प्रोफ़ाइल: ${buildProfileSummaryText(beneficiary, isHi)}."
+
+ट्रेनिंग के सुझाव:
+${coursesText || 'कोई ट्रेनिंग कोर्स नहीं मिला।'}
+
+काम के सुझाव:
+${livelihoodsText || 'कोई काम का विकल्प नहीं मिला।'}
+
+ध्यान दें:
+"ये सुझाव आपकी प्रोफ़ाइल पर आधारित हैं। ट्रेनिंग सीट, नौकरी, या फंडिंग की कोई गारंटी नहीं है - कृपया ट्रेनिंग सेंटर या स्थानीय अधिकारी से पुष्टि करें।"` : 
+`Profile confirmation:
+"Your profile: ${buildProfileSummaryText(beneficiary, isHi)}."
 
 Training recommendations:
 ${coursesText || 'No training courses found.'}
@@ -406,22 +419,24 @@ function isPositiveResponse(text) {
 /**
  * Build a language-neutral profile summary for CONFIRM_PROFILE
  */
-function buildProfileSummaryText(beneficiary) {
+function buildProfileSummaryText(beneficiary, isHi = false) {
   const parts = [];
-  if (beneficiary.district) parts.push(`District: ${beneficiary.district}`);
-  if (beneficiary.ageRange) parts.push(`Age: ${beneficiary.ageRange} years`);
+  if (beneficiary.district) parts.push(`${isHi ? 'ज़िला' : 'District'}: ${beneficiary.district}`);
+  if (beneficiary.ageRange) parts.push(`${isHi ? 'उम्र' : 'Age'}: ${beneficiary.ageRange} ${isHi ? 'साल' : 'years'}`);
   if (beneficiary.education && beneficiary.education !== 'unknown') {
-    parts.push(`Education: ${beneficiary.education}`);
+    parts.push(`${isHi ? 'पढ़ाई' : 'Education'}: ${beneficiary.education}`);
   }
-  if (beneficiary.currentWork) parts.push(`Current Work: ${beneficiary.currentWork}`);
-  if (beneficiary.skills?.length) parts.push(`Skills: ${beneficiary.skills.join(', ')}`);
-  if (beneficiary.interests?.length) parts.push(`Interests: ${beneficiary.interests.join(', ')}`);
+  if (beneficiary.currentWork) parts.push(`${isHi ? 'वर्तमान काम' : 'Current Work'}: ${beneficiary.currentWork}`);
+  if (beneficiary.skills?.length) parts.push(`${isHi ? 'स्किल्स' : 'Skills'}: ${beneficiary.skills.join(', ')}`);
+  if (beneficiary.interests?.length) parts.push(`${isHi ? 'दिलचस्पी' : 'Interests'}: ${beneficiary.interests.join(', ')}`);
   if (beneficiary.workPreference && beneficiary.workPreference !== 'unknown') {
-    const prefMap = { 'self': 'Self-employment', 'wage': 'Wage employment', 'either': 'Either' };
-    parts.push(`Work Preference: ${prefMap[beneficiary.workPreference] || beneficiary.workPreference}`);
+    const prefMapEn = { 'self': 'Self-employment', 'wage': 'Wage employment', 'either': 'Either' };
+    const prefMapHi = { 'self': 'अपना व्यवसाय', 'wage': 'नौकरी', 'either': 'कोई भी' };
+    const prefMap = isHi ? prefMapHi : prefMapEn;
+    parts.push(`${isHi ? 'काम की पसंद' : 'Work Preference'}: ${prefMap[beneficiary.workPreference] || beneficiary.workPreference}`);
   }
 
-  return parts.length > 0 ? parts.join(' | ') : 'No data collected yet';
+  return parts.length > 0 ? parts.join(' | ') : (isHi ? 'कोई जानकारी नहीं मिली' : 'No data collected yet');
 }
 
 /**

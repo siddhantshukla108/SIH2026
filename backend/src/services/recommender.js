@@ -126,7 +126,7 @@ Return ONLY valid JSON in this exact format:
   "courses": [
     {
       "refId": "the exact _id from the list",
-      "reason": "2 sentence Hindi/Hinglish explanation why this suits the person",
+      "reason": "2 sentence Hindi explanation why this suits the person",
       "skillGap": "what the person still needs to learn for this (Hindi, 1 sentence, or 'none')",
       "nextStep": "specific next action in Hindi (e.g., 'Najdiki ITI mein puchein')",
       "rank": 1
@@ -135,7 +135,7 @@ Return ONLY valid JSON in this exact format:
   "livelihoods": [
     {
       "refId": "the exact _id from the list",
-      "reason": "2 sentence Hindi/Hinglish explanation",
+      "reason": "2 sentence Hindi explanation",
       "skillGap": "what they need (Hindi)",
       "nextStep": "next action (Hindi)",
       "rank": 1

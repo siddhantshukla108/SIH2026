@@ -143,7 +143,7 @@ export default function VoiceDemo() {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       // Always use hi-IN voice — it has the softest, thinnest female tone
-      // and can read English/Hinglish text naturally with an Indian accent
+      // and can read English text naturally with an Indian accent
       utterance.lang = 'hi-IN';
       utterance.rate = 0.9;
       utterance.pitch = 1.1;
@@ -166,7 +166,7 @@ export default function VoiceDemo() {
         
         {/* Language Selector */}
         <div className="flex items-center bg-gray-100 p-0.5 sm:p-1 rounded-full text-[10px] sm:text-xs font-medium border border-gray-200/60">
-          {['Hindi', 'English', 'Hinglish'].map(lang => (
+          {['Hindi', 'English'].map(lang => (
             <button 
               key={lang}
               onClick={() => handleLanguageChange(lang)}

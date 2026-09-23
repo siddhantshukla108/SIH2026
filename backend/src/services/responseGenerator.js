@@ -26,7 +26,7 @@ const STATE_MSG_MAP = {
  * Generate a natural bot response using LLM
  * @param {string} userText - What the user just said
  * @param {string} nextState - The next state the engine wants to go to
- * @param {string} language - Target language (hindi, english, hinglish)
+ * @param {string} language - Target language (hindi, english)
  * @param {Object} beneficiary - Profile context
  * @param {string} profileSummary - Only provided for CONFIRM_PROFILE
  * @returns {string} Natural conversational string
@@ -65,10 +65,8 @@ DO NOT summarize or skip any fields. Maintain the exact bullet points, line brea
   let languageInstructions = '';
   if (targetLang === 'english') {
     languageInstructions = 'You MUST reply STRICTLY in ENGLISH ONLY. Do NOT use any Hindi words. Ignore the language the user is speaking; even if they speak in Hindi, you must reply in English.';
-  } else if (targetLang === 'hindi') {
-    languageInstructions = 'You MUST reply STRICTLY in PURE HINDI using DEVANAGARI SCRIPT ONLY (e.g., नमस्ते). Do NOT use English script (Latin) and do NOT use English words. Ignore the language the user is speaking; even if they speak in English or Hinglish, you must reply in Devanagari Hindi.';
   } else {
-    languageInstructions = 'You MUST reply STRICTLY in HINGLISH (a natural mix of Hindi and English written in ENGLISH/LATIN SCRIPT ONLY, e.g., "Aap kaise ho?"). Do NOT use Devanagari script. Ignore the language the user is speaking; even if they speak in pure English or pure Hindi, you must reply in Hinglish.';
+    languageInstructions = 'You MUST reply STRICTLY in PURE HINDI using DEVANAGARI SCRIPT ONLY (e.g., नमस्ते). Do NOT use English script (Latin) and do NOT use English words. Ignore the language the user is speaking; even if they speak in English, you must reply in Devanagari Hindi.';
   }
 
   let lengthInstruction = '4. Keep your response very concise, friendly, and conversational (under 3 sentences total).';
