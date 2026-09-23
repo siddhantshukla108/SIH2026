@@ -333,7 +333,7 @@ function findNextState(currentState, beneficiary) {
 async function generateRecommendations(beneficiary, msgs, language) {
   console.log('[Engine] ★ GENERATING RECOMMENDATIONS ★');
   const profile = beneficiary.toObject();
-  const results = await getRecommendations(profile);
+  const results = await getRecommendations(profile, language);
   console.log('[Engine] Recommendations result:', results.courses.length, 'courses,', results.livelihoods.length, 'livelihoods');
 
   if (results.courses.length === 0 && results.livelihoods.length === 0) {

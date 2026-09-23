@@ -20,7 +20,7 @@ const EDU_ORDER = { 'none': 0, '5th': 1, '8th': 2, '10th': 3, '12th': 4, 'gradua
  * @param {Object} profile - Beneficiary profile object
  * @returns {Object} { courses: [...], livelihoods: [...], rawText: string }
  */
-async function getRecommendations(profile) {
+async function getRecommendations(profile, language = 'hindi') {
   // Step 1 & 2: Get filtered candidates
   const candidateCourses = await filterCourses(profile);
   const candidateLivelihoods = await filterLivelihoods(profile);
@@ -30,7 +30,7 @@ async function getRecommendations(profile) {
   }
 
   // Step 3: LLM ranking
-  const ranked = await llmRank(profile, candidateCourses, candidateLivelihoods);
+  const ranked = await llmRank(profile, candidateCourses, candidateLivelihoods, language);
 
   // Step 4: Validate IDs exist in candidate list
   const validCourses = validateIds(ranked.courses, candidateCourses);
@@ -109,7 +109,10 @@ async function filterLivelihoods(profile) {
 /**
  * Step 3: Ask LLM to rank candidates and provide Hindi reasons
  */
-async function llmRank(profile, courses, livelihoods) {
+async function llmRank(profile, courses, livelihoods, language) {
+  const isHi = language === 'hindi';
+  const langStr = isHi ? "Hindi in Devanagari script" : "English";
+
   const profileSummary = buildProfileSummary(profile);
   const courseList = courses.map((c, i) => 
     `ID:${c._id} | ${c.title} | Sector:${c.sector} | NSQF:${c.nsqfLevel} | Jobs:${(c.jobRoles || []).join(', ')} | Tags:${(c.tags || []).join(', ')}`
@@ -126,18 +129,18 @@ Return ONLY valid JSON in this exact format:
   "courses": [
     {
       "refId": "the exact _id from the list",
-      "reason": "2 sentence Hindi explanation why this suits the person",
-      "skillGap": "what the person still needs to learn for this (Hindi, 1 sentence, or 'none')",
-      "nextStep": "specific next action in Hindi (e.g., 'Najdiki ITI mein puchein')",
+      "reason": "2 sentence explanation in ${langStr} why this suits the person",
+      "skillGap": "what the person still needs to learn for this (${langStr}, 1 sentence, or 'none')",
+      "nextStep": "specific next action in ${langStr}",
       "rank": 1
     }
   ],
   "livelihoods": [
     {
       "refId": "the exact _id from the list",
-      "reason": "2 sentence Hindi explanation",
-      "skillGap": "what they need (Hindi)",
-      "nextStep": "next action (Hindi)",
+      "reason": "2 sentence explanation (${langStr})",
+      "skillGap": "what they need (${langStr})",
+      "nextStep": "next action (${langStr})",
       "rank": 1
     }
   ]

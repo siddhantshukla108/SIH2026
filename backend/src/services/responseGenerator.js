@@ -59,7 +59,7 @@ async function generateResponse(userText, nextState, language, beneficiary, prof
 \`\`\`
 ${profileSummary}
 \`\`\`
-DO NOT summarize or skip any fields. Maintain the exact bullet points, line breaks, and structure. Only translate the labels into the target language if needed. Ensure the disclaimer is always present at the bottom.`;
+DO NOT summarize or skip any fields. Maintain the exact bullet points, line breaks, and structure. You MUST translate ALL content—including job roles, skills, reasons, English text, and labels—into pure Devanagari Hindi if the target language is Hindi, or pure English if English. Ensure the disclaimer is always present at the bottom.`;
   }
 
   let languageInstructions = '';
