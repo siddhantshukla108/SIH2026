@@ -278,7 +278,7 @@ async function processState(conversation, beneficiary, userText, language) {
 
   // If we've collected enough, go to CONFIRM_PROFILE
   if (nextState === 'CONFIRM_PROFILE') {
-    const summary = buildHindiProfileSummary(beneficiary);
+    const summary = buildProfileSummaryText(beneficiary);
     const botText = await generateResponse(userText, 'CONFIRM_PROFILE', language, beneficiary.toObject(), summary);
     return {
       botText,
@@ -361,7 +361,7 @@ async function generateRecommendations(beneficiary, msgs, language) {
   ).join('\n\n');
 
   const rawTextForLLM = `Profile confirmation:
-"Aapka profile: ${buildHindiProfileSummary(beneficiary)}."
+"Your profile: ${buildProfileSummaryText(beneficiary)}."
 
 Training recommendations:
 ${coursesText || 'No training courses found.'}
@@ -370,7 +370,7 @@ Livelihood recommendations:
 ${livelihoodsText || 'No livelihood options found.'}
 
 Disclaimer (always shown at the end):
-"Yeh sujhav aapki profile ke aadhar par diye gaye hain. Training seat, job placement ya funding ki guarantee nahi hai — kripya training centre ya local officer se confirm karein."`;
+"These recommendations are based on your profile. There is no guarantee for training seats, job placement, or funding - please confirm with the training centre or local officer."`;
 
   // Tell the LLM to output exactly what we just formatted, translated/adjusted to the correct language
   const botText = await require('./responseGenerator').generateResponse('I want recommendations', 'RECOMMEND', language, profile, rawTextForLLM);
@@ -404,24 +404,24 @@ function isPositiveResponse(text) {
 }
 
 /**
- * Build a Hindi profile summary for CONFIRM_PROFILE
+ * Build a language-neutral profile summary for CONFIRM_PROFILE
  */
-function buildHindiProfileSummary(beneficiary) {
+function buildProfileSummaryText(beneficiary) {
   const parts = [];
-  if (beneficiary.district) parts.push(`aap ${beneficiary.district} se hain`);
-  if (beneficiary.ageRange) parts.push(`umr ${beneficiary.ageRange} saal`);
+  if (beneficiary.district) parts.push(`District: ${beneficiary.district}`);
+  if (beneficiary.ageRange) parts.push(`Age: ${beneficiary.ageRange} years`);
   if (beneficiary.education && beneficiary.education !== 'unknown') {
-    parts.push(`${beneficiary.education} pass hain`);
+    parts.push(`Education: ${beneficiary.education}`);
   }
-  if (beneficiary.currentWork) parts.push(`${beneficiary.currentWork} ka kaam karte hain`);
-  if (beneficiary.skills?.length) parts.push(`aapko ${beneficiary.skills.join(', ')} aata hai`);
-  if (beneficiary.interests?.length) parts.push(`aapko ${beneficiary.interests.join(', ')} mein interest hai`);
+  if (beneficiary.currentWork) parts.push(`Current Work: ${beneficiary.currentWork}`);
+  if (beneficiary.skills?.length) parts.push(`Skills: ${beneficiary.skills.join(', ')}`);
+  if (beneficiary.interests?.length) parts.push(`Interests: ${beneficiary.interests.join(', ')}`);
   if (beneficiary.workPreference && beneficiary.workPreference !== 'unknown') {
-    const prefMap = { 'self': 'apna khud ka kaam', 'wage': 'naukri', 'either': 'dono chalega' };
-    parts.push(`aap ${prefMap[beneficiary.workPreference] || beneficiary.workPreference} chahte hain`);
+    const prefMap = { 'self': 'Self-employment', 'wage': 'Wage employment', 'either': 'Either' };
+    parts.push(`Work Preference: ${prefMap[beneficiary.workPreference] || beneficiary.workPreference}`);
   }
 
-  return parts.length > 0 ? parts.join(', ') : 'Abhi zyada jaankari nahi hai';
+  return parts.length > 0 ? parts.join(' | ') : 'No data collected yet';
 }
 
 /**
