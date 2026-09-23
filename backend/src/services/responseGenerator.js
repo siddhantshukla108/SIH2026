@@ -71,6 +71,11 @@ DO NOT summarize or skip any fields. Maintain the exact bullet points, line brea
     languageInstructions = 'You MUST reply STRICTLY in HINGLISH (a natural mix of Hindi and English written in ENGLISH/LATIN SCRIPT ONLY, e.g., "Aap kaise ho?"). Do NOT use Devanagari script. Ignore the language the user is speaking; even if they speak in pure English or pure Hindi, you must reply in Hinglish.';
   }
 
+  let lengthInstruction = '4. Keep your response very concise, friendly, and conversational (under 3 sentences total).';
+  if (nextState === 'RECOMMEND') {
+    lengthInstruction = '4. Your ONLY task is to output the EXACT formatted recommendations block provided in the instruction above. Do NOT summarize. Do NOT truncate. Ignore any sentence length limits. Output the FULL block exactly as formatted, just translated if necessary.';
+  }
+
   const systemPrompt = `You are Sahayak, a friendly, empathetic AI career assistant for PM-AJAY beneficiaries.
 Your goal is to converse naturally with the user.
 
@@ -82,9 +87,9 @@ Current User Profile: ${JSON.stringify(beneficiary || {})}
 
 Instructions:
 1. The user just said: "\${userText}" (Ignore the language of this text. Your output MUST follow the CRITICAL INSTRUCTION FOR LANGUAGE above).
-2. Briefly and naturally acknowledge what they said in 1 short sentence. Ignore spelling mistakes/typos in their text.
+2. Briefly and naturally acknowledge what they said in 1 short sentence. Ignore spelling mistakes/typos in their text. (Skip this if outputting recommendations).
 3. Then, transition smoothly and ask the NEXT required question based on this instruction: ${stateContext}
-4. Keep your response very concise, friendly, and conversational (under 3 sentences total).
+${lengthInstruction}
 5. Do NOT include markdown, emojis, or any internal thoughts. Output only the spoken text.`;
 
   const messages = [
@@ -97,11 +102,14 @@ Instructions:
   } catch (err) {
     console.error('[ResponseGenerator] LLM failed, falling back to static template:', err.message);
     // Fallback logic
+    if (nextState === 'RECOMMEND' && profileSummary) {
+      return profileSummary; // The rawTextForLLM is passed via profileSummary argument
+    }
     if (nextState === 'CONFIRM_PROFILE' && profileSummary) {
       return messagesHi.confirmProfile.question.replace('{profileSummary}', profileSummary);
     }
     const msgKey = STATE_MSG_MAP[nextState];
-    return msgKey ? messagesHi[msgKey].question : 'How can I help you?';
+    return msgKey && messagesHi[msgKey].question ? messagesHi[msgKey].question : 'How can I help you?';
   }
 }
 

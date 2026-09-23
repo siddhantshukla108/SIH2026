@@ -377,8 +377,8 @@ Disclaimer (always shown at the end):
 
   // Format recommendations for storage
   const storedRecs = [
-    ...results.courses.map(r => ({ type: 'course', ...r })),
-    ...results.livelihoods.map(r => ({ type: 'livelihood', ...r })),
+    ...results.courses.map(r => ({ ...r, type: 'course' })),
+    ...results.livelihoods.map(r => ({ ...r, type: 'livelihood' })),
   ];
 
   return {
