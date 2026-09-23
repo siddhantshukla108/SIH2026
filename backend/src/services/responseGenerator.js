@@ -55,23 +55,27 @@ async function generateResponse(userText, nextState, language, beneficiary, prof
   } else if (nextState === 'START') {
     stateContext = `Welcome the user to Sahayak, tell them you will help find training and work, and ask if they are ready to talk.`;
   } else if (nextState === 'RECOMMEND') {
+    const transInstruction = targetLang === 'hindi' 
+      ? 'you MUST TRANSLATE EVERY SINGLE WORD (including job roles, skills, reasons, notes, and English text) into pure Devanagari Hindi. There MUST BE ZERO English words or Roman script characters in your final output. For example, "Organic Farm Manager" should be translated to "जैविक फार्म प्रबंधक".' 
+      : 'you MUST output the block in pure English ONLY. Do not use Hindi.';
+
     stateContext = `OUTPUT THE FOLLOWING EXACTLY AS FORMATTED:
 \`\`\`
 ${profileSummary}
 \`\`\`
-DO NOT summarize or skip any fields. Maintain the exact bullet points, line breaks, and structure. You MUST translate ALL content—including job roles, skills, reasons, English text, and labels—into pure Devanagari Hindi if the target language is Hindi, or pure English if English. Ensure the disclaimer is always present at the bottom.`;
+DO NOT summarize or skip any fields. Maintain the exact bullet points and structure, BUT ${transInstruction} Ensure the disclaimer is always present at the bottom.`;
   }
 
   let languageInstructions = '';
   if (targetLang === 'english') {
     languageInstructions = 'You MUST reply STRICTLY in ENGLISH ONLY. Do NOT use any Hindi words. Ignore the language the user is speaking; even if they speak in Hindi, you must reply in English.';
   } else {
-    languageInstructions = 'You MUST reply STRICTLY in PURE HINDI using DEVANAGARI SCRIPT ONLY (e.g., नमस्ते). Do NOT use English script (Latin) and do NOT use English words. Ignore the language the user is speaking; even if they speak in English, you must reply in Devanagari Hindi.';
+    languageInstructions = 'You MUST reply STRICTLY in PURE HINDI using DEVANAGARI SCRIPT ONLY (e.g., नमस्ते). Do NOT use English script (Latin) and do NOT use ANY English words whatsoever. If there are English terms (like job roles or skills), translate them to their Hindi equivalents. Ignore the language the user is speaking; even if they speak in English, you must reply in pure Devanagari Hindi.';
   }
 
   let lengthInstruction = '4. Keep your response very concise, friendly, and conversational (under 3 sentences total).';
   if (nextState === 'RECOMMEND') {
-    lengthInstruction = '4. Your ONLY task is to output the EXACT formatted recommendations block provided in the instruction above. Do NOT summarize. Do NOT truncate. Ignore any sentence length limits. Output the FULL block exactly as formatted, just translated if necessary.';
+    lengthInstruction = '4. Your ONLY task is to output the FULL recommendations block. Do NOT summarize or truncate. IMPORTANT: Translate the ENTIRE block (every single word) into the target language.';
   }
 
   const systemPrompt = `You are Sahayak, a friendly, empathetic AI career assistant for PM-AJAY beneficiaries.
