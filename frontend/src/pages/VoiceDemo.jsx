@@ -312,13 +312,7 @@ export default function VoiceDemo() {
               <div ref={chatEndRef} />
             </div>
 
-            {/* Floating side badge */}
-            {turns.length > 2 && (
-              <div className="absolute -left-5 top-[42%] bg-white px-3 py-2 rounded-xl shadow-lg border border-gray-100 flex items-center gap-2 text-[10px] font-semibold text-gray-600 animate-slide-up z-20 hidden xl:flex">
-                <Sparkles size={12} className="text-[var(--color-sahayak-rust)]" />
-                That helps me understand your path.
-              </div>
-            )}
+
 
             {/* "Tap to speak" Input Bar */}
             <div className="px-4 pb-4 pt-2 bg-white shrink-0">
@@ -349,16 +343,7 @@ export default function VoiceDemo() {
             </div>
           </div>
 
-          {/* Bottom floating badge – positioned outside the card */}
-          <div className="absolute -bottom-1 left-0 bg-white p-2.5 rounded-xl shadow-lg border border-gray-100 flex items-center gap-2.5 z-20 animate-slide-up hidden lg:flex" style={{animationDelay: '0.5s'}}>
-            <div className="bg-emerald-100 text-emerald-600 p-1.5 rounded-full">
-              <CheckCircle2 size={13} />
-            </div>
-            <div>
-              <p className="text-[11px] font-bold text-[var(--color-sahayak-sidebar)] leading-tight">A plan that fits</p>
-              <p className="text-[9px] text-gray-400 font-medium">Built around your life</p>
-            </div>
-          </div>
+
         </div>
 
       </div>
