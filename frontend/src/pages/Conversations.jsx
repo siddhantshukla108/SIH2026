@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Search, Filter } from 'lucide-react';
+import { ArrowLeft, Search, Filter, RefreshCw, Globe, Phone, Mic, MapPin, Clock, CheckCircle2, UserCircle2, Briefcase } from 'lucide-react';
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const API_BASE = `${BACKEND_URL}/api`;
@@ -9,32 +9,56 @@ const API_BASE = `${BACKEND_URL}/api`;
 export default function Conversations() {
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const fetchConvos = async (isManualRefresh = false) => {
     const token = localStorage.getItem('adminToken');
     if (!token) {
       navigate('/login');
       return;
     }
 
-    const fetchConvos = async () => {
-      try {
-        const res = await axios.get(`${API_BASE}/admin/conversations?limit=50`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setConversations(res.data.data);
-      } catch (err) {
-        if (err.response?.status === 401) {
-          localStorage.removeItem('adminToken');
-          navigate('/login');
-        }
-      } finally {
-        setLoading(false);
+    if (isManualRefresh) setIsRefreshing(true);
+    else setLoading(true);
+
+    try {
+      const res = await axios.get(`${API_BASE}/admin/conversations?limit=50`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setConversations(res.data.data);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        localStorage.removeItem('adminToken');
+        navigate('/login');
       }
-    };
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
     fetchConvos();
   }, [navigate]);
+
+  const getChannelIcon = (channel) => {
+    switch(channel?.toLowerCase()) {
+      case 'web': return <Globe size={14} className="text-blue-500" />;
+      case 'whatsapp': return <Phone size={14} className="text-emerald-500" />;
+      case 'ivr': return <Mic size={14} className="text-purple-500" />;
+      default: return <Globe size={14} className="text-gray-400" />;
+    }
+  };
+
+  const getChannelStyle = (channel) => {
+    switch(channel?.toLowerCase()) {
+      case 'web': return 'bg-blue-50 text-blue-700 border-blue-100';
+      case 'whatsapp': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+      case 'ivr': return 'bg-purple-50 text-purple-700 border-purple-100';
+      default: return 'bg-gray-50 text-gray-600 border-gray-200';
+    }
+  };
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-slide-up w-full overflow-x-hidden">
@@ -47,8 +71,17 @@ export default function Conversations() {
           </Link>
           <div>
             <h1 className="font-serif text-3xl font-bold text-[var(--color-sahayak-sidebar)] tracking-tight">Recent Conversations</h1>
-            <p className="text-gray-500 font-medium mt-1">Officer Dashboard / Logs</p>
+            <p className="text-gray-500 font-medium mt-1">Officer Dashboard / Activity Logs</p>
           </div>
+        </div>
+        <div className="flex gap-3">
+          <button 
+            onClick={() => fetchConvos(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl font-semibold transition-colors border border-gray-200"
+          >
+            <RefreshCw size={16} className={isRefreshing ? 'animate-spin text-[var(--color-sahayak-rust)]' : ''} />
+            Refresh
+          </button>
         </div>
       </div>
 
@@ -57,72 +90,137 @@ export default function Conversations() {
         {/* Toolbar */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div className="relative w-full sm:w-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input type="text" placeholder="Search conversations..." className="pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl outline-none focus:border-[var(--color-sahayak-rust)] focus:ring-2 focus:ring-[var(--color-sahayak-rust-light)] shadow-sm text-sm font-medium w-full sm:w-72 text-gray-700 transition-all" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input type="text" placeholder="Search by location, skills..." className="pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-[var(--color-sahayak-rust)] focus:ring-4 focus:ring-[var(--color-sahayak-rust-light)]/30 shadow-sm text-sm font-medium w-full sm:w-80 text-gray-700 transition-all placeholder:text-gray-400" />
           </div>
-          <button className="flex items-center gap-2 bg-white border border-gray-200 px-5 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 shadow-sm font-medium text-sm transition-colors w-full sm:w-auto justify-center">
-            <Filter size={16} /> Filter
+          <button className="flex items-center gap-2 bg-white border border-gray-200 px-5 py-3 rounded-xl text-gray-700 hover:bg-gray-50 shadow-sm font-semibold text-sm transition-colors w-full sm:w-auto justify-center">
+            <Filter size={16} /> Filter Results
           </button>
         </div>
 
-        {/* Data Table */}
-        <div className="bg-white rounded-3xl shadow-sm overflow-hidden border border-gray-100">
-          {loading ? (
-            <div className="p-12 flex flex-col items-center justify-center text-gray-400">
-              <div className="w-8 h-8 border-4 border-gray-200 border-t-[var(--color-sahayak-rust)] rounded-full animate-spin mb-4"></div>
-              <p className="font-medium text-gray-500">Loading records...</p>
+        {/* Data Grid / Cards */}
+        {loading && !isRefreshing ? (
+          <div className="space-y-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm animate-pulse flex gap-6 items-center">
+                <div className="w-12 h-12 bg-gray-100 rounded-full"></div>
+                <div className="flex-1 space-y-3">
+                  <div className="h-4 bg-gray-100 rounded w-1/4"></div>
+                  <div className="h-3 bg-gray-50 rounded w-1/2"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : conversations.length === 0 ? (
+          <div className="bg-white p-12 rounded-3xl border border-gray-100 shadow-sm text-center flex flex-col items-center">
+            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+              <UserCircle2 size={32} className="text-gray-300" />
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm whitespace-nowrap">
-                <thead className="bg-[var(--color-sahayak-bg)] border-b border-gray-100 text-gray-500 font-semibold uppercase tracking-wider text-[11px]">
-                  <tr>
-                    <th className="py-4 px-6">Date</th>
-                    <th className="py-4 px-6">Channel</th>
-                    <th className="py-4 px-6">Location</th>
-                    <th className="py-4 px-6">Profile Details</th>
-                    <th className="py-4 px-6 text-right">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {conversations.map((c) => (
-                    <tr key={c._id} className="hover:bg-gray-50/50 transition-colors group">
-                      <td className="py-4 px-6 text-gray-500 font-medium text-[13px]">
-                        {new Date(c.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className="capitalize font-semibold text-[var(--color-sahayak-sidebar)] bg-[var(--color-sahayak-beige)] px-3 py-1 rounded-lg text-xs">
-                          {c.channel}
+            <h3 className="text-lg font-bold text-gray-700">No conversations yet</h3>
+            <p className="text-gray-500 mt-1">Wait for users to interact with Sahayak.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {conversations.map((c) => {
+              const isCompleted = c.status === 'completed';
+              const ben = c.beneficiary || {};
+              const hasProfileData = (ben.education && ben.education !== 'unknown') || (ben.currentWork && ben.currentWork !== 'unknown') || (ben.skills && ben.skills.length > 0);
+              
+              return (
+                <div key={c._id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all flex flex-col md:flex-row gap-6 md:items-center relative group">
+                  
+                  {/* Avatar & Channel */}
+                  <div className="flex items-center gap-4 md:w-[22%] shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--color-sahayak-beige)] to-[var(--color-sahayak-yellow)] flex items-center justify-center border-2 border-white shadow-sm shrink-0">
+                      <UserCircle2 size={24} className="text-[var(--color-sahayak-sidebar)] opacity-70" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-bold text-[var(--color-sahayak-sidebar)] text-[15px]">
+                          {ben.name && ben.name !== 'unknown' ? ben.name : 'Anonymous User'}
                         </span>
-                      </td>
-                      <td className="py-4 px-6 text-gray-700 font-medium text-[13px]">
-                        {c.beneficiary.district || <span className="text-gray-400 italic">Unknown</span>}
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="text-[var(--color-sahayak-sidebar)] font-bold text-[14px]">
-                          {c.beneficiary.education} <span className="text-gray-300 mx-1">•</span> {c.beneficiary.currentWork}
-                        </div>
-                        <div className="text-gray-500 text-[12px] mt-1 font-medium">
-                          Skills: {(c.beneficiary.skills || []).join(', ') || '-'}
-                        </div>
-                      </td>
-                      <td className="py-4 px-6 text-right">
-                        {c.status === 'completed' ? (
-                          <span className="inline-flex items-center px-3 py-1 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">Completed</span>
-                        ) : (
-                          <span className="inline-flex items-center px-3 py-1 rounded-xl text-xs font-bold bg-[var(--color-sahayak-yellow)]/10 text-amber-700 border border-[var(--color-sahayak-yellow)]/30">{c.state}</span>
-                        )}
                         {c.isDemo && (
-                          <span className="ml-2 inline-flex items-center px-3 py-1 rounded-xl text-xs font-bold bg-purple-50 text-purple-600 border border-purple-100">DEMO</span>
+                          <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[9px] font-black uppercase tracking-wider rounded-md">Demo</span>
                         )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs font-semibold">
+                        <span className={`px-2.5 py-1 rounded-md border flex items-center gap-1.5 ${getChannelStyle(c.channel)}`}>
+                          {getChannelIcon(c.channel)}
+                          <span className="capitalize">{c.channel || 'Web'}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Location & Time */}
+                  <div className="md:w-[15%] flex flex-col gap-2 border-l border-gray-100 pl-6 shrink-0 hidden md:flex">
+                    <div className="flex items-start gap-2 text-gray-600">
+                      <MapPin size={14} className="mt-0.5 shrink-0 text-[var(--color-sahayak-rust)] opacity-70" />
+                      <div>
+                        {ben.district && ben.district !== 'unknown' ? (
+                          <p className="text-sm font-semibold text-gray-700 leading-tight">{ben.district}</p>
+                        ) : (
+                          <p className="text-sm font-medium text-gray-400 italic leading-tight">Location unknown</p>
+                        )}
+                        {ben.state && ben.state !== 'unknown' && <p className="text-[11px] text-gray-500 mt-0.5">{ben.state}</p>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Profile Highlights */}
+                  <div className="flex-1 flex flex-wrap gap-2 md:border-l md:border-gray-100 md:pl-6">
+                    {hasProfileData ? (
+                      <>
+                        {ben.education && ben.education !== 'unknown' && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-50 border border-gray-200 text-gray-700 rounded-lg text-xs font-semibold">
+                            🎓 {ben.education}
+                          </span>
+                        )}
+                        {ben.currentWork && ben.currentWork !== 'unknown' && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-50 border border-gray-200 text-gray-700 rounded-lg text-xs font-semibold">
+                            <Briefcase size={12} className="text-gray-400" /> {ben.currentWork}
+                          </span>
+                        )}
+                        {ben.skills && ben.skills.slice(0, 2).map((skill, idx) => (
+                          <span key={idx} className="inline-flex items-center px-3 py-1 bg-blue-50 border border-blue-100 text-blue-700 rounded-lg text-xs font-semibold">
+                            {skill}
+                          </span>
+                        ))}
+                        {ben.skills && ben.skills.length > 2 && (
+                          <span className="inline-flex items-center px-2 py-1 bg-gray-100 border border-gray-200 text-gray-500 rounded-lg text-xs font-semibold">
+                            +{ben.skills.length - 2} more
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-[13px] text-gray-400 italic flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-gray-200"></div> No profile details collected yet
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Status & Date */}
+                  <div className="md:w-[15%] flex flex-col md:items-end justify-center gap-2 shrink-0 border-t md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0">
+                    {isCompleted ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
+                        <CheckCircle2 size={14} className="text-emerald-500" /> Completed
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 shadow-sm">
+                        <Clock size={14} className="text-amber-500" /> {c.state === 'START' ? 'Just Started' : 'In Progress'}
+                      </span>
+                    )}
+                    <span className="text-[11px] font-semibold text-gray-400">
+                      {new Date(c.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+
+                </div>
+              );
+            })}
+          </div>
+        )}
+
       </main>
     </div>
   );
