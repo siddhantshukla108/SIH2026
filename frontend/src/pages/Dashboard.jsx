@@ -85,14 +85,21 @@ export default function Dashboard() {
           <h2 className="text-4xl font-bold text-[var(--color-sahayak-sidebar)]">{summary.totalConversations}</h2>
         </div>
         
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:-translate-y-1 transition-transform cursor-pointer group">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="bg-[var(--color-sahayak-rust-light)] p-3 rounded-xl group-hover:bg-[var(--color-sahayak-rust)] group-hover:text-white transition-colors">
-              <GraduationCap className="text-[var(--color-sahayak-rust)] group-hover:text-white" size={24} />
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:-translate-y-1 transition-transform cursor-pointer group relative overflow-hidden">
+          <div className="flex justify-between items-start mb-4 relative z-10">
+            <div className="flex items-center gap-4">
+              <div className="bg-[var(--color-sahayak-rust-light)] p-3 rounded-xl group-hover:bg-[var(--color-sahayak-rust)] group-hover:text-white transition-colors">
+                <GraduationCap className="text-[var(--color-sahayak-rust)] group-hover:text-white" size={24} />
+              </div>
+              <p className="text-sm text-gray-500 font-semibold uppercase tracking-wide">Completed Profiles</p>
             </div>
-            <p className="text-sm text-gray-500 font-semibold uppercase tracking-wide">Completed Profiles</p>
+            {summary.totalConversations > 0 && (
+              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100">
+                {((summary.completedProfiles / summary.totalConversations) * 100).toFixed(1)}% Rate
+              </span>
+            )}
           </div>
-          <h2 className="text-4xl font-bold text-[var(--color-sahayak-sidebar)]">{summary.completedProfiles}</h2>
+          <h2 className="text-4xl font-bold text-[var(--color-sahayak-sidebar)] relative z-10">{summary.completedProfiles}</h2>
         </div>
         
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:-translate-y-1 transition-transform cursor-pointer group">
@@ -107,12 +114,22 @@ export default function Dashboard() {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* District Chart */}
-        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="font-serif text-xl font-bold text-[var(--color-sahayak-sidebar)] mb-6">Beneficiaries by District</h3>
-          <div className="h-72">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2 group">
+          <div className="flex justify-between items-end mb-6">
+            <div>
+              <h3 className="font-serif text-xl font-bold text-[var(--color-sahayak-sidebar)]">Beneficiaries by District</h3>
+              <p className="text-sm text-gray-500 mt-1">Geographical distribution of users</p>
+            </div>
+            {districtData.length > 0 && (
+              <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold border border-blue-100">
+                Top: {districtData[0]._id} ({districtData[0].count})
+              </div>
+            )}
+          </div>
+          <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={districtData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <XAxis dataKey="_id" tick={{fontSize: 12, fill: '#6b7280'}} axisLine={false} tickLine={false} />
@@ -134,39 +151,70 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Education Chart */}
-        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="font-serif text-xl font-bold text-[var(--color-sahayak-sidebar)] mb-6">Education Distribution</h3>
-          <div className="h-72 flex justify-center">
+        {/* Channel Split Chart */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 group flex flex-col justify-between">
+          <div>
+            <h3 className="font-serif text-xl font-bold text-[var(--color-sahayak-sidebar)] mb-1">Channel Split</h3>
+            <p className="text-sm text-gray-500 mb-2">Where users interact</p>
+          </div>
+          <div className="h-48 flex justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={educationData}
+                  data={summary.channelSplit}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
+                  innerRadius={50}
+                  outerRadius={75}
                   paddingAngle={5}
                   dataKey="count"
                   nameKey="_id"
-                  label={({_id, percent}) => `${_id} (${(percent * 100).toFixed(0)}%)`}
-                  labelLine={false}
                 >
-                  {educationData.map((entry, index) => (
+                  {summary.channelSplit?.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip 
-                  contentStyle={{
-                    borderRadius: '12px', 
-                    border: 'none', 
-                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-                    backgroundColor: '#fff',
-                    color: '#1a1c29',
-                    fontWeight: 500
-                  }}
+                  formatter={(value, name) => [value, name ? String(name).toUpperCase() : 'Unknown']}
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
               </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex flex-wrap gap-2 justify-center mt-4">
+            {summary.channelSplit?.map((entry, idx) => (
+              <div key={idx} className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
+                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
+                {entry._id?.toUpperCase() || 'UNKNOWN'}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Education Chart (Horizontal) */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-3 flex flex-col md:flex-row gap-8 items-center group">
+          <div className="w-full md:w-1/3">
+            <h3 className="font-serif text-xl font-bold text-[var(--color-sahayak-sidebar)] mb-2">Education Distribution</h3>
+            <p className="text-sm text-gray-500 mb-4">Educational background of all registered beneficiaries.</p>
+            {educationData.length > 0 && summary.totalConversations > 0 && (
+              <div className="bg-emerald-50 text-emerald-800 p-4 rounded-xl border border-emerald-100">
+                <p className="text-sm font-semibold text-emerald-700">Most Common</p>
+                <p className="text-2xl font-bold mt-1 text-emerald-900">{educationData[0]._id}</p>
+                <p className="text-xs mt-1 font-semibold text-emerald-600 opacity-80">{Math.round((educationData[0].count / summary.totalConversations) * 100)}% of total users</p>
+              </div>
+            )}
+          </div>
+          <div className="h-64 w-full md:w-2/3">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={educationData} layout="vertical" margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
+                <XAxis type="number" hide />
+                <YAxis dataKey="_id" type="category" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#4b5563', fontWeight: 500}} />
+                <Tooltip 
+                  cursor={{fill: 'rgba(0, 0, 0, 0.05)'}}
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                />
+                <Bar dataKey="count" fill="var(--color-sahayak-rust)" radius={[0, 6, 6, 0]} barSize={24} />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
