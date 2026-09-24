@@ -56,14 +56,17 @@ async function generateResponse(userText, nextState, language, beneficiary, prof
     stateContext = `Welcome the user to Sahayak, tell them you will help find training and work, and ask if they are ready to talk.`;
   } else if (nextState === 'RECOMMEND') {
     const transInstruction = targetLang === 'hindi' 
-      ? 'you MUST TRANSLATE EVERY SINGLE WORD (including job roles, skills, reasons, notes, and English text) into pure Devanagari Hindi. There MUST BE ZERO English words or Roman script characters in your final output. For example, "Organic Farm Manager" should be translated to "जैविक फार्म प्रबंधक".' 
-      : 'you MUST output the block in pure English ONLY. Do not use Hindi.';
+      ? 'You MUST TRANSLATE EVERY SINGLE WORD (including job roles, skills, reasons, notes, and English text) into pure Devanagari Hindi. There MUST BE ZERO English words or Roman script characters in your final output.' 
+      : 'You MUST output the response in pure English ONLY. Do not use Hindi.';
 
-    stateContext = `OUTPUT THE FOLLOWING EXACTLY AS FORMATTED:
+    stateContext = `Here are the recommendations generated for the user:
 \`\`\`
 ${profileSummary}
 \`\`\`
-DO NOT summarize or skip any fields. Maintain the exact bullet points and structure, BUT ${transInstruction} Ensure the disclaimer is always present at the bottom.`;
+Your task is to synthesize this information into a cohesive, natural, and conversational paragraph. 
+DO NOT use bullet points, numbered lists, or rigid formatting. Write it as a continuous, empathetic prose that sounds like a human career counselor speaking to the user. 
+Include all the specific details (course names, hours, NSQF levels, job roles, startup costs, etc.) but weave them naturally into sentences. 
+${transInstruction} Ensure the disclaimer is naturally integrated at the very end.`;
   }
 
   let languageInstructions = '';
